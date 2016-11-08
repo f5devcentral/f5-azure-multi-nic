@@ -1,0 +1,238 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "resourceGroupName": {
+      "type": "string",
+      "metadata": {
+        "description": "The Resource Group Name that contains the Virtual Network that will be external."
+      }
+    },
+    "vnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "The Name of the virtual network"
+      }
+    },
+    "externalSubnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of first subnet - with External Acccess to Internet."
+      }
+    },
+    "internalSubnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of internal Subnet for UDR, NOT the subnet with the Servers in it."
+      }
+    },
+    "f5Name": {
+      "type": "string",
+      "defaultValue": "bigip",
+      "metadata": {
+        "description": "The Unique Name of the BIG-IP instance, that will be used for the Public DNS Name of the Public IP."
+      }
+    },
+    "f5Size": {
+      "type": "string",
+      "defaultValue": "Standard_F2",
+      "allowedValues": [
+        "Standard_F2",
+        "Standard_A3",
+        "Standard_A4"
+      ],
+      "metadata": {
+        "description": "The size of the BIG-IP Instance."
+      }
+    },
+    "externalIPAddress": {
+      "type": "string",
+      "metadata": {
+        "Description": "The IP address of the new BIGIP"
+      }
+    },
+    "internalIPAddress": {
+      "type": "string",
+      "metadata": {
+        "Description": "The IP address of the new BIGIP"
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "metadata": {
+        "description": "User name to login to the BIG-IP."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The password to login to the BIG-IP"
+      }
+    }
+  },
+  "variables": {
+    "vnetID": "[resourceId(parameters('resourceGroupName'),'Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
+    "subnet-idExternal": "[concat(variables('vnetID'),'/subnets/',parameters('externalSubnetName'))]",
+    "subnet-idInternal": "[concat(variables('vnetID'),'/subnets/',parameters('internalSubnetName'))]",
+    "externalNICNamePrefix": "[concat(parameters('f5Name'),'-externalnic')]",
+    "udrNICNamePrefix": "[concat(parameters('f5Name'),'-udrnic')]",
+    "f5publicIPName": "[concat(parameters('f5Name'),'-IP')]",
+    "newStorageAccountName": "[concat(parameters('f5Name'),'store')]",
+    "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('f5publicIPName'))]"
+  },
+  "resources": [
+    {
+      "name": "[variables('newStorageAccountName')]",
+      "tags": {
+        "displayName": "StorageAccount"
+      },
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-05-01-preview",
+      "properties": {
+        "accountType": "Standard_LRS"
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "tags": {
+        "displayName": "Public IP Address"
+      },
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[variables('f5publicIPName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[parameters('f5Name')]"
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "tags": {
+        "displayName": "External NIC"
+      },
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('externalNICNamePrefix')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[variables('publicIPID')]"
+      ],
+      "properties": {
+        "enableIPForwarding": true,
+        "ipConfigurations": [
+          {
+            "name": "ipconfig",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[variables('publicIPID')]"
+              },
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('externalIPAddress')]",
+              "subnet": {
+                "id": "[variables('subnet-idExternal')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "tags": {
+        "displayName": "UDR NIC"
+      },
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[variables('udrNICNamePrefix')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "enableIPForwarding": true,
+        "ipConfigurations": [
+          {
+            "name": "ipconfig",
+            "properties": {
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[parameters('internalIPAddress')]",
+              "subnet": {
+                "id": "[variables('subnet-idInternal')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "tags": {
+        "displayName": "BIG-IP VM"
+      },
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[parameters('f5Name')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/',variables('externalNICNamePrefix'))]",
+        "[concat('Microsoft.Network/networkInterfaces/',variables('udrNICNamePrefix'))]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]"
+      ],
+      "plan": {
+        "name": "f5-bigip-virtual-edition-best-byol",
+        "publisher": "f5-networks",
+        "product": "f5-big-ip"
+
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('f5Size')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('f5Name')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "f5-networks",
+            "offer": "f5-big-ip",
+            "sku": "f5-bigip-virtual-edition-best-byol",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "[concat(parameters('f5Name'), 'osDisk')]",
+            "vhd": {
+              "uri": "[concat('http://',variables('newStorageAccountName'),'.blob.core.windows.net/',variables('newStorageAccountName'),'/',parameters('f5Name'),'.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('externalNICNamePrefix'))]",
+              "properties": {
+                "primary": true
+              }
+            },
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('udrNICNamePrefix'))]",
+              "properties": {
+                "primary": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "GUI-URL": {
+      "type": "string",
+      "value": "[concat('https://',reference(variables('publicIPID')).dnsSettings.fqdn)]"
+    },
+    "SSH-URL": {
+      "type": "string",
+      "value": "[concat(reference(variables('publicIPID')).dnsSettings.fqdn)]"
+    }
+  }
+}
