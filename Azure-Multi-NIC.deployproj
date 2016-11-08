@@ -25,6 +25,14 @@
   <Import Condition=" Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets') " Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets" />
   <!-- vertag<:>end -->
   <ItemGroup>
+    <None Include="eight_nic_bigip_vm.json" />
+    <None Include="inboundNATRules.json" />
+    <None Include="seven_nic_bigip_vm.json" />
+    <None Include="six_nic_bigip_vm.json" />
+    <None Include="five_nic_bigip_vm.json" />
+    <None Include="four_nic_bigip_vm.json" />
+    <None Include="three_nic_bigip_vm.json" />
+    <None Include="two_nic_bigip_vm.json" />
     <None Include="Deployment.targets">
       <Visible>False</Visible>
     </None>

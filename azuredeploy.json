@@ -2,7 +2,7 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "resourceGroupName": {
+    "vnetResourceGroupName": {
       "type": "string",
       "metadata": {
         "description": "The Resource Group Name that contains the Virtual Network that will be external."
@@ -11,7 +11,7 @@
     "vnetName": {
       "type": "string",
       "metadata": {
-        "description": "The Name of the virtual network"
+        "description": "The Name of the existing virtual network that you want to connect the BIG-IP's to."
       }
     },
     "externalSubnetName": {
@@ -33,28 +33,67 @@
         "description": "The Unique Name of the BIG-IP instance, that will be used for the Public DNS Name of the Public IP."
       }
     },
+    "f5SKU": {
+      "type": "string",
+      "defaultValue": "Best",
+      "allowedValues": [
+        "Good",
+        "Better",
+        "Best"
+      ],
+      "metadata": {
+        "description": "Choose the SKU of F5 BIG-IP you wish to deploy.  Good, Better, Best"
+      }
+    },
     "f5Size": {
       "type": "string",
-      "defaultValue": "Standard_F2",
+      "defaultValue": "Standard_F2s",
       "allowedValues": [
-        "Standard_F2",
-        "Standard_A3",
-        "Standard_A4"
+        "Standard_DS2_v2",
+        "Standard_DS3_v2",
+        "Standard_DS4_v2",
+        "Standard_F2s",
+        "Standard_F4s",
+        "Standard_F8s"
       ],
       "metadata": {
         "description": "The size of the BIG-IP Instance."
       }
     },
-    "externalIPAddress": {
-      "type": "string",
+    "numberOFBIGIPs": {
+      "type": "int",
+      "defaultValue": 2,
       "metadata": {
-        "Description": "The IP address of the new BIGIP"
-      }
+        "description": "The total number of BIG-IP's (Up to 4) you want to deploy. If you chose no from above, please select 1."
+      },
+      "allowedValues": [
+        1,
+        2,
+        3,
+        4
+      ]
     },
-    "internalIPAddress": {
+    "numberOfAdditionalInterfaces": {
       "type": "string",
+      "defaultValue": "0",
       "metadata": {
-        "Description": "The IP address of the new BIGIP"
+        "description": "By default two interfaces are deployed.  If the VM instance that you have chosen supports more than two, you can specify the additional number of NIC's here.  So if you can have 4, you would specify 2 here.  Zero, means only 2 NIC's will be deployed."
+      },
+      "allowedValues": [
+        "0",
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6"
+      ]
+    },
+    "additionalSubnets":{
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "A semi-colon delimited string of subnets, one for each of the additional interfaces. If zero, leave this field blank, if one enter a single subnet, if two type two subnet names separated by a semi-colon.  Exmaple subnet3;subnet4"
       }
     },
     "adminUsername": {
@@ -71,18 +110,55 @@
     }
   },
   "variables": {
-    "vnetID": "[resourceId(parameters('resourceGroupName'),'Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
-    "subnet-idExternal": "[concat(variables('vnetID'),'/subnets/',parameters('externalSubnetName'))]",
-    "subnet-idInternal": "[concat(variables('vnetID'),'/subnets/',parameters('internalSubnetName'))]",
-    "externalNICNamePrefix": "[concat(parameters('f5Name'),'-externalnic')]",
-    "udrNICNamePrefix": "[concat(parameters('f5Name'),'-udrnic')]",
+    "avsetNamePrefix": "[concat(parameters('f5Name'),'-avset')]",
     "f5publicIPName": "[concat(parameters('f5Name'),'-IP')]",
+    "loadBalancerName": "[concat(parameters('f5Name'),'-ALB')]",
     "newStorageAccountName": "[concat(parameters('f5Name'),'store')]",
-    "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('f5publicIPName'))]"
+    "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('f5publicIPName'))]",
+    "skuHash": {
+      "Good": "f5-bigip-virtual-edition-good-byol",
+      "Better": "f5-bigip-virtual-edition-better-byol",
+      "Best": "f5-bigip-virtual-edition-best-byol"
+    },
+    "templateLocationPrefix": "https://raw.githubusercontent.com/tstanley93/Azure-Multi-NIC/Multi-BIG-IP/Azure-Multi-NIC/Azure-Multi-NIC/",
+    "bigipHash": {
+      "0": "[concat(variables('templateLocationPrefix'),'two_nic_bigip_vm.json')]",
+      "1": "[concat(variables('templateLocationPrefix'),'three_nic_bigip_vm.json')]",
+      "2": "[concat(variables('templateLocationPrefix'),'four_nic_bigip_vm.json')]",
+      "3": "[concat(variables('templateLocationPrefix'),'five_nic_bigip_vm.json')]",
+      "4": "[concat(variables('templateLocationPrefix'),'six_nic_bigip_vm.json')]",
+      "5": "[concat(variables('templateLocationPrefix'),'seven_nic_bigip_vm.json')]",
+      "6": "[concat(variables('templateLocationPrefix'),'eight_nic_bigip_vm.json')]"
+    }
   },
   "resources": [
     {
+      "name": "[variables('avsetNamePrefix')]",
+      "tags": {
+        "displayName": "Availability Set"
+      },
+      "type": "Microsoft.Compute/availabilitySets",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-05-01-preview",
+      "properties": {
+        "platformUpdateDomainCount": 1,
+        "platformFaultDomainCount": 1
+      }
+    },
+    {
       "name": "[variables('newStorageAccountName')]",
+      "tags": {
+        "displayName": "StorageAccount"
+      },
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-05-01-preview",
+      "properties": {
+        "accountType": "Premium_LRS"
+      }
+    },
+    {
+      "name": "[concat(parameters('f5Name'),'diagstor')]",
       "tags": {
         "displayName": "StorageAccount"
       },
@@ -109,118 +185,169 @@
       }
     },
     {
-      "apiVersion": "2015-05-01-preview",
+      "apiVersion": "2015-06-15",
       "tags": {
-        "displayName": "External NIC"
+        "displayName": "Network Security Group"
       },
-      "type": "Microsoft.Network/networkInterfaces",
-      "name": "[variables('externalNICNamePrefix')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[concat(parameters('f5Name'), '-nsg')]",
       "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[variables('publicIPID')]"
-      ],
       "properties": {
-        "enableIPForwarding": true,
-        "ipConfigurations": [
+        "securityRules": [
           {
-            "name": "ipconfig",
+            "name": "mgt_rule",
+            "properties": {
+              "description": "",
+              "priority": 101,
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "443",
+              "protocol": "Tcp",
+              "direction": "Inbound",
+              "access": "Allow"
+            }
+          },
+          {
+            "name": "ssh_rule",
+            "properties": {
+              "description": "",
+              "priority": 102,
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22",
+              "protocol": "Tcp",
+              "direction": "Inbound",
+              "access": "Allow"
+            }
+          },
+          {
+            "name": "app_rule_880",
+            "properties": {
+              "description": "",
+              "priority": 103,
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "880",
+              "protocol": "Tcp",
+              "direction": "Inbound",
+              "access": "Allow"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "tags": {
+        "displayName": "Azure Load Balancer"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('f5publicIPName'))]"
+      ],
+      "location": "[resourceGroup().location]",
+      "name": "[variables('loadBalancerName')]",
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "loadBalancerFrontEnd",
             "properties": {
               "publicIPAddress": {
                 "id": "[variables('publicIPID')]"
-              },
-              "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[parameters('externalIPAddress')]",
-              "subnet": {
-                "id": "[variables('subnet-idExternal')]"
               }
             }
           }
-        ]
-      }
-    },
-    {
-      "apiVersion": "2015-05-01-preview",
-      "tags": {
-        "displayName": "UDR NIC"
-      },
-      "type": "Microsoft.Network/networkInterfaces",
-      "name": "[variables('udrNICNamePrefix')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "enableIPForwarding": true,
-        "ipConfigurations": [
+        ],
+        "backendAddressPools": [
           {
-            "name": "ipconfig",
+            "name": "loadBalancerBackEnd"
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "name": "lbrule",
             "properties": {
-              "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[parameters('internalIPAddress')]",
-              "subnet": {
-                "id": "[variables('subnet-idInternal')]"
-              }
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]"
+              },
+              "backendAddressPool": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
+              },
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe')]"
+              },
+              "protocol": "Tcp",
+              "frontendPort": 80,
+              "backendPort": 880,
+              "idleTimeoutInMinutes": 15
             }
           }
+        ],
+        "probes": [
+          {
+            "properties": {
+              "protocol": "Tcp",
+              "port": 880,
+              "intervalInSeconds": 15,
+              "numberOfProbes": 2
+            },
+            "name": "lbprobe"
+          }
         ]
+      },
+      "type": "Microsoft.Network/loadBalancers"
+    },
+    {
+      "apiVersion": "2015-01-01",
+      "name": "InboundNATRuleTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "dependsOn": [
+        "[concat('Microsoft.Network/loadBalancers/',variables('loadBalancerName'))]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('avsetNamePrefix'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[concat(variables('templateLocationPrefix'), 'inboundNATRules.json')]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "f5Name": { "value": "[parameters('f5Name')]" },
+          "numberOFBIGIPs": { "value": "[parameters('numberOFBIGIPs')]" }
+        }
       }
     },
     {
-      "apiVersion": "2015-05-01-preview",
-      "tags": {
-        "displayName": "BIG-IP VM"
-      },
-      "type": "Microsoft.Compute/virtualMachines",
-      "name": "[parameters('f5Name')]",
-      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-01-01",
+      "name": "BIGIPTemplate",
+      "type": "Microsoft.Resources/deployments",
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/',variables('externalNICNamePrefix'))]",
-        "[concat('Microsoft.Network/networkInterfaces/',variables('udrNICNamePrefix'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]"
+        "[concat('Microsoft.Resources/deployments/', 'InboundNATRuleTemplate')]",
+        "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('avsetNamePrefix'))]"
       ],
-      "plan": {
-        "name": "f5-bigip-virtual-edition-best-byol",
-        "publisher": "f5-networks",
-        "product": "f5-big-ip"
-
-      },
       "properties": {
-        "hardwareProfile": {
-          "vmSize": "[parameters('f5Size')]"
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('bigipHash')[parameters('numberOfAdditionalInterfaces')]]",
+          "contentVersion": "1.0.0.0"
         },
-        "osProfile": {
-          "computerName": "[parameters('f5Name')]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "f5-networks",
-            "offer": "f5-big-ip",
-            "sku": "f5-bigip-virtual-edition-best-byol",
-            "version": "latest"
-          },
-          "osDisk": {
-            "name": "[concat(parameters('f5Name'), 'osDisk')]",
-            "vhd": {
-              "uri": "[concat('http://',variables('newStorageAccountName'),'.blob.core.windows.net/',variables('newStorageAccountName'),'/',parameters('f5Name'),'.vhd')]"
-            },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
-          }
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('externalNICNamePrefix'))]",
-              "properties": {
-                "primary": true
-              }
-            },
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('udrNICNamePrefix'))]",
-              "properties": {
-                "primary": false
-              }
-            }
-          ]
+        "parameters": {
+          "f5Name": { "value": "[parameters('f5Name')]" },
+          "f5Size": { "value": "[parameters('f5Size')]" },
+          "numberOFBIGIPs": { "value": "[parameters('numberOFBIGIPs')]" },
+          "adminUsername": { "value": "[parameters('adminUsername')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "f5SKU": { "value": "[variables('skuHash')[parameters('f5SKU')]]" },
+          "vnetResourceGroupName": { "value": "[toLower(parameters('vnetResourceGroupName'))]" },
+          "vnetName": { "value": "[parameters('vnetName')]" },
+          "externalSubnetName": { "value": "[parameters('externalSubnetName')]" },
+          "internalSubnetName": { "value": "[parameters('internalSubnetName')]" },
+          "numberOfAdditionalInterfaces": { "value": "[parameters('numberOfAdditionalInterfaces')]" },
+          "additionalSubnets": { "value": "[parameters('additionalSubnets')]"}
         }
       }
     }
@@ -228,11 +355,11 @@
   "outputs": {
     "GUI-URL": {
       "type": "string",
-      "value": "[concat('https://',reference(variables('publicIPID')).dnsSettings.fqdn)]"
+      "value": "[concat('https://',reference(variables('publicIPID')).dnsSettings.fqdn,':8443')]"
     },
     "SSH-URL": {
       "type": "string",
-      "value": "[concat(reference(variables('publicIPID')).dnsSettings.fqdn)]"
+      "value": "[concat(reference(variables('publicIPID')).dnsSettings.fqdn, ' 8022')]"
     }
   }
 }

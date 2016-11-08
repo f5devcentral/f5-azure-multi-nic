@@ -1,0 +1,139 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vnetResourceGroupName": {
+      "type": "string"
+    },
+    "vnetName": {
+      "type": "string"
+    },
+    "externalSubnetName": {
+      "type": "string"
+    },
+    "internalSubnetName": {
+      "type": "string"
+    },
+    "f5Name": {
+      "type": "string"
+    },
+    "numberOFBIGIPs": {
+      "type": "int"
+    },
+    "numberOfAdditionalInterfaces": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "intAddInterfaces": "[int(parameters('numberOfAdditionalInterfaces'))]",
+    "intAddBigIPs": "[int(parameters('numberOFBIGIPs'))]",
+    "vnetID": "[resourceId(parameters('vnetResourceGroupName'),'Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
+    "subnet-idExternal": "[concat(variables('vnetID'),'/subnets/',parameters('externalSubnetName'))]",
+    "subnet-idInternal": "[concat(variables('vnetID'),'/subnets/',parameters('internalSubnetName'))]",
+    "externalNICNamePrefix": "[concat(parameters('f5Name'),'-externalnic')]",
+    "udrNICNamePrefix": "[concat(parameters('f5Name'),'-udrnic')]",
+    "additionNICNamePrefix": "[concat(parameters('f5Name'),'-nic')]",
+    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(parameters('f5Name'),'-nsg'))]",
+    "loadBalancerName": "[concat(parameters('f5Name'),'-ALB')]",
+    "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
+    "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-05-01-preview",
+      "tags": {
+        "displayName": "External NIC"
+      },
+      "copy": {
+        "count": "[parameters('numberOFBIGIPs')]",
+        "name": "niccopy"
+      },
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(variables('externalNICNamePrefix'), copyIndex())]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "networkSecurityGroup": {
+          "id": "[variables('nsgID')]"
+        },
+        "enableIPForwarding": true,
+        "ipConfigurations": [
+          {
+            "name": "ipconfig",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnet-idExternal')]"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[concat(variables('lbID'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
+                }
+              ],
+              "loadBalancerInboundNatRules": [
+                {
+                  "id": "[concat(variables('lbID'), '/inboundNatRules/', 'guimgt',copyIndex())]"
+                },
+                {
+                  "id": "[concat(variables('lbID'), '/inboundNatRules/', 'sshmgt',copyIndex())]"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "tags": {
+        "displayName": "UDR NIC"
+      },
+      "copy": {
+        "count": "[parameters('numberOFBIGIPs')]",
+        "name": "niccopy"
+      },
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(variables('udrNICNamePrefix'), copyIndex())]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "enableIPForwarding": true,
+        "ipConfigurations": [
+          {
+            "name": "ipconfig",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnet-idInternal')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "tags": {
+        "displayName": "Additional NIC"
+      },
+      "copy": {
+        "count": "[mul(variables('intAddInterfaces'),variables('intAddBigIPs'))]",
+        "name": "niccopy"
+      },
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(variables('additionNICNamePrefix'), copyIndex(2),copyIndex())]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnet-idInternal')]"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
