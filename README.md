@@ -1,8 +1,7 @@
-![Releases](https://img.shields.io/badge/release-v1.0-blue.svg)
-[![Commits](https://img.shields.io/github/commits-since/ArtiomL/f5-azure-ha/v1.0.2.svg?label=commits%20since)](https://github.com/ArtiomL/f5-azure-ha/commits/master)
-[![Maintenance](https://img.shields.io/maintenance/yes/2016.svg)](https://github.com/ArtiomL/f5-azure-ha/graphs/code-frequency)
-[![Issues](https://img.shields.io/github/issues/ArtiomL/f5-azure-ha.svg)](https://github.com/ArtiomL/f5-azure-ha/issues)
-![TMOS](https://img.shields.io/badge/tmos-12.1-ff0000.svg)
+[![Releases](https://img.shields.io/github/release/f5devcentral/f5-azure-multi-nic.svg)](https://github.com/f5devcentral/f5-azure-multi-nic/releases)
+[![Commits](https://img.shields.io/github/commits-since/f5devcentral/f5-azure-multi-nic/v1.0.svg)](https://github.com/f5devcentral/f5-azure-multi-nic/commits/multiple-bigips)
+[![Issues](https://img.shields.io/github/issues/f5devcentral/f5-azure-multi-nic.svg)](https://github.com/f5devcentral/f5-azure-multi-nic/issues)
+[![TMOS Version](https://img.shields.io/badge/tmos--version-12.1-ff0000.svg)](https://github.com/f5devcentral/f5-azure-multi-nic/tree/multiple-bigips)
 
 # Azure Multi-NIC BIG-IP
 Deploy a Multi-NIC BIG-IP into Azure  
