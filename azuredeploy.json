@@ -263,7 +263,7 @@
         "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]"
       ],
       "plan": {
-        "name": "[parameters('f5SKU')]",
+        "name": "[variables('skuHash')[parameters('f5SKU')]]",
         "publisher": "f5-networks",
         "product": "f5-big-ip"
 
@@ -284,7 +284,7 @@
           "imageReference": {
             "publisher": "f5-networks",
             "offer": "f5-big-ip",
-            "sku": "[parameters('f5SKU')]",
+            "sku": "[variables('skuHash')[parameters('f5SKU')]]",
             "version": "latest"
           },
           "osDisk": {
