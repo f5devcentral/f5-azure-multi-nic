@@ -2,7 +2,7 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "resourceGroupName": {
+    "vnetResourceGroupName": {
       "type": "string",
       "metadata": {
         "description": "The Resource Group Name that contains the Virtual Network that will be external."
@@ -32,29 +32,32 @@
       "metadata": {
         "description": "The Unique Name of the BIG-IP instance, that will be used for the Public DNS Name of the Public IP."
       }
-    },
+    }, 
+    "f5SKU": { 
+      "type": "string", 
+      "defaultValue": "Best", 
+      "allowedValues": [ 
+        "Good", 
+        "Better", 
+        "Best" 
+      ], 
+      "metadata": { 
+        "description": "Choose the SKU of F5 BIG-IP you wish to deploy.  Good, Better, Best" 
+      } 
+    }, 
     "f5Size": {
       "type": "string",
       "defaultValue": "Standard_F2",
       "allowedValues": [
-        "Standard_F2",
-        "Standard_A3",
-        "Standard_A4"
+        "Standard_DS2_v2",
+        "Standard_DS3_v2",
+        "Standard_DS4_v2",
+        "Standard_F2s",
+        "Standard_F4s",
+        "Standard_F8s"
       ],
       "metadata": {
         "description": "The size of the BIG-IP Instance."
-      }
-    },
-    "externalIPAddress": {
-      "type": "string",
-      "metadata": {
-        "Description": "The IP address of the new BIGIP"
-      }
-    },
-    "internalIPAddress": {
-      "type": "string",
-      "metadata": {
-        "Description": "The IP address of the new BIGIP"
       }
     },
     "adminUsername": {
@@ -71,18 +74,49 @@
     }
   },
   "variables": {
-    "vnetID": "[resourceId(parameters('resourceGroupName'),'Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
+    "avsetNamePrefix": "[concat(parameters('f5Name'),'-avset')]",
+    "vnetID": "[resourceId(parameters('vnetResourceGroupName'),'Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
     "subnet-idExternal": "[concat(variables('vnetID'),'/subnets/',parameters('externalSubnetName'))]",
     "subnet-idInternal": "[concat(variables('vnetID'),'/subnets/',parameters('internalSubnetName'))]",
     "externalNICNamePrefix": "[concat(parameters('f5Name'),'-externalnic')]",
     "udrNICNamePrefix": "[concat(parameters('f5Name'),'-udrnic')]",
     "f5publicIPName": "[concat(parameters('f5Name'),'-IP')]",
     "newStorageAccountName": "[concat(parameters('f5Name'),'store')]",
-    "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('f5publicIPName'))]"
+    "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('f5publicIPName'))]",
+    "skuHash": {
+      "Good": "f5-bigip-virtual-edition-good-byol",
+      "Better": "f5-bigip-virtual-edition-better-byol",
+      "Best": "f5-bigip-virtual-edition-best-byol"
+    }
   },
   "resources": [
     {
+      "name": "[variables('avsetNamePrefix')]",
+      "tags": {
+        "displayName": "Availability Set"
+      },
+      "type": "Microsoft.Compute/availabilitySets",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-05-01-preview",
+      "properties": {
+        "platformUpdateDomainCount": 1,
+        "platformFaultDomainCount": 1
+      }
+    },
+    {
       "name": "[variables('newStorageAccountName')]",
+      "tags": {
+        "displayName": "StorageAccount"
+      },
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-05-01-preview",
+      "properties": {
+        "accountType": "Premium_LRS"
+      }
+    },
+    {
+      "name": "[concat(parameters('f5Name'),'diagstor')]",
       "tags": {
         "displayName": "StorageAccount"
       },
@@ -109,6 +143,61 @@
       }
     },
     {
+      "apiVersion": "2015-06-15",
+      "tags": {
+        "displayName": "Network Security Group"
+      },
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[concat(parameters('f5Name'), '-nsg')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "mgt_rule",
+            "properties": {
+              "description": "",
+              "priority": 101,
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "443",
+              "protocol": "Tcp",
+              "direction": "Inbound",
+              "access": "Allow"
+            }
+          },
+          {
+            "name": "ssh_rule",
+            "properties": {
+              "description": "",
+              "priority": 102,
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "22",
+              "protocol": "Tcp",
+              "direction": "Inbound",
+              "access": "Allow"
+            }
+          },
+          {
+            "name": "app_rule_880",
+            "properties": {
+              "description": "",
+              "priority": 103,
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "880",
+              "protocol": "Tcp",
+              "direction": "Inbound",
+              "access": "Allow"
+            }
+          }
+        ]
+      }
+    },
+    {
       "apiVersion": "2015-05-01-preview",
       "tags": {
         "displayName": "External NIC"
@@ -128,8 +217,7 @@
               "publicIPAddress": {
                 "id": "[variables('publicIPID')]"
               },
-              "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[parameters('externalIPAddress')]",
+              "privateIPAllocationMethod": "Dynamic",             
               "subnet": {
                 "id": "[variables('subnet-idExternal')]"
               }
@@ -152,8 +240,7 @@
           {
             "name": "ipconfig",
             "properties": {
-              "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[parameters('internalIPAddress')]",
+              "privateIPAllocationMethod": "Dynamic",
               "subnet": {
                 "id": "[variables('subnet-idInternal')]"
               }
@@ -176,12 +263,15 @@
         "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]"
       ],
       "plan": {
-        "name": "f5-bigip-virtual-edition-best-byol",
+        "name": "[parameters('f5SKU')]",
         "publisher": "f5-networks",
         "product": "f5-big-ip"
 
       },
       "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('avsetNamePrefix'))]"
+        },
         "hardwareProfile": {
           "vmSize": "[parameters('f5Size')]"
         },
@@ -194,7 +284,7 @@
           "imageReference": {
             "publisher": "f5-networks",
             "offer": "f5-big-ip",
-            "sku": "f5-bigip-virtual-edition-best-byol",
+            "sku": "[parameters('f5SKU')]",
             "version": "latest"
           },
           "osDisk": {
@@ -221,6 +311,12 @@
               }
             }
           ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": true,
+            "storageUri": "[concat('http://',parameters('f5Name'),'diagstor','.blob.core.windows.net')]"
+          }
         }
       }
     }
