@@ -260,7 +260,8 @@
       "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/',variables('externalNICNamePrefix'))]",
         "[concat('Microsoft.Network/networkInterfaces/',variables('udrNICNamePrefix'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]"
+        "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]",
+        "[concat('Microsoft.Storage/storageAccounts/', parameters('f5Name'),'diagstor')]"
       ],
       "plan": {
         "name": "[variables('skuHash')[parameters('f5SKU')]]",
