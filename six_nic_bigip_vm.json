@@ -32,12 +32,11 @@
     "internalSubnetName": {
       "type": "string"
     },
-    "numberOfAdditionalInterfaces": {
+    "additionalSubnets": {
       "type": "string"
     }
   },
   "variables": {
-    "intAddInterfaces": "[int(parameters('numberOfAdditionalInterfaces'))]",
     "intAddBigIPs": "[int(parameters('numberOFBIGIPs'))]",
     "avsetNamePrefix": "[concat(parameters('f5Name'),'-avset')]",
     "externalNICNamePrefix": "[concat(parameters('f5Name'),'-externalnic')]",
@@ -50,7 +49,7 @@
     "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(parameters('f5Name'),'-nsg'))]",
     "loadBalancerName": "[concat(parameters('f5Name'),'-ALB')]",
     "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
-    "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]"
+    "additionalSubnets": "[split(parameters('additionalSubnets'), ';')]"
   },
   "resources": [
     {
@@ -142,7 +141,7 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
-                "id": "[variables('subnet-idInternal')]"
+                "id": "[concat(variables('vnetID'),'/subnets/',variables('additionalSubnets')[0])]"
               }
             }
           }
@@ -168,7 +167,7 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
-                "id": "[variables('subnet-idInternal')]"
+                "id": "[concat(variables('vnetID'),'/subnets/',variables('additionalSubnets')[1])]"
               }
             }
           }
@@ -194,7 +193,7 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
-                "id": "[variables('subnet-idInternal')]"
+                "id": "[concat(variables('vnetID'),'/subnets/',variables('additionalSubnets')[2])]"
               }
             }
           }
@@ -220,7 +219,7 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
-                "id": "[variables('subnet-idInternal')]"
+                "id": "[concat(variables('vnetID'),'/subnets/',variables('additionalSubnets')[3])]"
               }
             }
           }
@@ -248,7 +247,7 @@
       "name": "[concat(parameters('f5Name'),copyIndex())]",
       "location": "[resourceGroup().location]",
       "plan": {
-        "name": "f5-bigip-virtual-edition-best-byol",
+        "name": "[parameters('f5SKU')]",
         "publisher": "f5-networks",
         "product": "f5-big-ip"
 
@@ -269,7 +268,7 @@
           "imageReference": {
             "publisher": "f5-networks",
             "offer": "f5-big-ip",
-            "sku": "f5-bigip-virtual-edition-best-byol",
+            "sku": "[parameters('f5SKU')]",
             "version": "latest"
           },
           "osDisk": {

@@ -346,7 +346,6 @@
           "vnetName": { "value": "[parameters('vnetName')]" },
           "externalSubnetName": { "value": "[parameters('externalSubnetName')]" },
           "internalSubnetName": { "value": "[parameters('internalSubnetName')]" },
-          "numberOfAdditionalInterfaces": { "value": "[parameters('numberOfAdditionalInterfaces')]" },
           "additionalSubnets": { "value": "[parameters('additionalSubnets')]"}
         }
       }

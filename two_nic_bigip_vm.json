@@ -32,9 +32,6 @@
     "internalSubnetName": {
       "type": "string"
     },
-    "numberOfAdditionalInterfaces": {
-      "type": "string"
-    },
     "additionalSubnets": {
       "type": "string"
     }

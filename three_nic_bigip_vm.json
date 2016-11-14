@@ -32,15 +32,11 @@
     "internalSubnetName": {
       "type": "string"
     },
-    "numberOfAdditionalInterfaces": {
-      "type": "string"
-    },
     "additionalSubnets": {
       "type": "string"
     }
   },
   "variables": {
-    "intAddInterfaces": "[int(parameters('numberOfAdditionalInterfaces'))]",
     "intAddBigIPs": "[int(parameters('numberOFBIGIPs'))]",
     "avsetNamePrefix": "[concat(parameters('f5Name'),'-avset')]",
     "externalNICNamePrefix": "[concat(parameters('f5Name'),'-externalnic')]",
