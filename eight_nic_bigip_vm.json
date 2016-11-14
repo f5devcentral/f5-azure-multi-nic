@@ -389,7 +389,7 @@
         "diagnosticsProfile": {
           "bootDiagnostics": {
             "enabled": true,
-            "storageUri": "[concat('http://',variables('newstorageAccountName'),'.blob.core.windows.net')]"
+            "storageUri": "[concat('http://',parameters('f5Name'),'diagstor','.blob.core.windows.net')]"
           }
         }
       }
