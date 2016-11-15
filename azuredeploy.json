@@ -327,6 +327,7 @@
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/', 'InboundNATRuleTemplate')]",
         "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]",
+        "[concat('Microsoft.Storage/storageAccounts/', parameters('f5Name'),'diagstor')]",
         "[concat('Microsoft.Compute/availabilitySets/', variables('avsetNamePrefix'))]"
       ],
       "properties": {
