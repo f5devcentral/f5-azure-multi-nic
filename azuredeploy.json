@@ -158,18 +158,6 @@
       }
     },
     {
-      "name": "[concat(parameters('f5Name'),'diagstor')]",
-      "tags": {
-        "displayName": "StorageAccount"
-      },
-      "type": "Microsoft.Storage/storageAccounts",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2015-05-01-preview",
-      "properties": {
-        "accountType": "Standard_LRS"
-      }
-    },
-    {
       "apiVersion": "2015-05-01-preview",
       "tags": {
         "displayName": "Public IP Address"
@@ -327,7 +315,6 @@
       "dependsOn": [
         "[concat('Microsoft.Resources/deployments/', 'InboundNATRuleTemplate')]",
         "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]",
-        "[concat('Microsoft.Storage/storageAccounts/', parameters('f5Name'),'diagstor')]",
         "[concat('Microsoft.Compute/availabilitySets/', variables('avsetNamePrefix'))]"
       ],
       "properties": {

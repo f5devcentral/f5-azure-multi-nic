@@ -253,12 +253,6 @@
               }
             }
           ]
-        },
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": true,        
-            "storageUri": "[concat('http://',parameters('f5Name'),'diagstor','.blob.core.windows.net')]" 
-          }
         }
       }
     }
