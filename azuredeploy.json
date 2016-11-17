@@ -152,7 +152,7 @@
       },
       "type": "Microsoft.Storage/storageAccounts",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2016-01-01",
+      "apiVersion": "2015-06-15",
       "properties": {
         "accountType": "Premium_LRS"
       }
@@ -164,7 +164,7 @@
       },
       "type": "Microsoft.Storage/storageAccounts",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2016-01-01",
+      "apiVersion": "2015-06-15",
       "properties": {
         "accountType": "Standard_LRS"
       }
