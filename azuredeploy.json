@@ -152,9 +152,21 @@
       },
       "type": "Microsoft.Storage/storageAccounts",
       "location": "[resourceGroup().location]",
-      "apiVersion": "2015-05-01-preview",
+      "apiVersion": "2016-01-01",
       "properties": {
         "accountType": "Premium_LRS"
+      }
+    },
+    {
+      "name": "[concat(parameters('f5Name'),'diagstor')]",
+      "tags": {
+        "displayName": "Diagnostics StorageAccount"
+      },
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-01-01",
+      "properties": {
+        "accountType": "Standard_LRS"
       }
     },
     {
