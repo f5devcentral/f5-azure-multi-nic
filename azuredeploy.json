@@ -114,6 +114,7 @@
     "f5publicIPName": "[concat(parameters('f5Name'),'-IP')]",
     "loadBalancerName": "[concat(parameters('f5Name'),'-ALB')]",
     "newStorageAccountName": "[concat(parameters('f5Name'),'store')]",
+    "newDiagStorAccountName": "[concat(parameters('f5Name'),'diagstor')]",
     "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('f5publicIPName'))]",
     "skuHash": {
       "Good": "f5-bigip-virtual-edition-good-byol",
@@ -158,7 +159,7 @@
       }
     },
     {
-      "name": "[concat(parameters('f5Name'),'diagstor')]",
+      "name": "[variables('newDiagStorAccountName')]",
       "tags": {
         "displayName": "Diagnostics StorageAccount"
       },
