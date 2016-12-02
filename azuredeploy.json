@@ -113,8 +113,7 @@
     "avsetNamePrefix": "[concat(parameters('f5Name'),'-avset')]",
     "f5publicIPName": "[concat(parameters('f5Name'),'-IP')]",
     "loadBalancerName": "[concat(parameters('f5Name'),'-ALB')]",
-    "newStorageAccountName": "[concat(parameters('f5Name'),'store')]",
-    "newDiagStorAccountName": "[concat(parameters('f5Name'),'diagstor')]",
+    "newStorageAccountName": "[concat(parameters('f5Name'),'store')]",    
     "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('f5publicIPName'))]",
     "skuHash": {
       "Good": "f5-bigip-virtual-edition-good-byol",
@@ -156,18 +155,6 @@
       "apiVersion": "2015-06-15",
       "properties": {
         "accountType": "Premium_LRS"
-      }
-    },
-    {
-      "name": "[variables('newDiagStorAccountName')]",
-      "tags": {
-        "displayName": "Diagnostics StorageAccount"
-      },
-      "type": "Microsoft.Storage/storageAccounts",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
-      "properties": {
-        "accountType": "Standard_LRS"
       }
     },
     {
