@@ -253,15 +253,6 @@
               }
             }
           ]
-<<<<<<< HEAD
-=======
-        },
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": false,
-            "storageUri": "[reference(concat('Microsoft.Storage/storageAccounts', variables('newDiagStorAccountName'), providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob)]"
-          }
->>>>>>> 2b4157329a36c631411f4eb087f5b9c1c03441e9
         }
       }
     }
