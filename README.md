@@ -6,7 +6,6 @@
 # Azure Multi-NIC BIG-IP
 Deploy a Multi-NIC BIG-IP into Azure  
 
-<<<<<<< HEAD
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ff5devcentral%2Ff5-azure-multi-nic%2Fmaster%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
@@ -60,7 +59,6 @@ This template will allow you to deploy more than one F5 BIG-IP into Azure with 2
 This template will deploy the following inside of either a new resource group or an existing one depending on what you select;
 
 * Premium Storage Container for the BIG-IP's
-* Standard Storage Container for boot diagnostics.
 * Public IP Address
 * NIC objects for the F5 BIG-IP VM.
 * F5 BIG-IP Virtual Machine
