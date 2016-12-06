@@ -1,0 +1,191 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "f5Name": {
+      "type": "string"
+    },
+    "f5Size": {
+      "type": "string"
+    },
+    "numberOFBIGIPs": {
+      "type": "int"
+    },
+    "adminUsername": {
+      "type": "string"
+    },
+    "adminPassword": {
+      "type": "securestring"
+    },
+    "f5SKU": {
+      "type": "string"
+    },
+    "vnetResourceGroupName": {
+      "type": "string"
+    },
+    "vnetName": {
+      "type": "string"
+    },
+    "externalSubnetName": {
+      "type": "string"
+    },
+    "internalSubnetName": {
+      "type": "string"
+    },
+    "additionalSubnets": {
+      "type": "string"
+    }
+  },
+  "variables": {
+    "avsetNamePrefix": "[concat(parameters('f5Name'),'-avset')]",
+    "externalNICNamePrefix": "[concat(parameters('f5Name'),'-externalnic')]",
+    "udrNICNamePrefix": "[concat(parameters('f5Name'),'-udrnic')]",
+    "newStorageAccountName": "[concat(parameters('f5Name'),'store')]",
+    "vnetID": "[resourceId(parameters('vnetResourceGroupName'),'Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
+    "subnet-idExternal": "[concat(variables('vnetID'),'/subnets/',parameters('externalSubnetName'))]",
+    "subnet-idInternal": "[concat(variables('vnetID'),'/subnets/',parameters('internalSubnetName'))]",
+    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(parameters('f5Name'),'-nsg'))]",
+    "loadBalancerName": "[concat(parameters('f5Name'),'-ALB')]",
+    "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-05-01-preview",
+      "tags": {
+        "displayName": "External NIC"
+      },
+      "copy": {
+        "count": "[parameters('numberOFBIGIPs')]",
+        "name": "niccopy"
+      },
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(variables('externalNICNamePrefix'), copyIndex())]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "networkSecurityGroup": {
+          "id": "[variables('nsgID')]"
+        },
+        "enableIPForwarding": true,
+        "ipConfigurations": [
+          {
+            "name": "ipconfig",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnet-idExternal')]"
+              },
+              "loadBalancerBackendAddressPools": [
+                {
+                  "id": "[concat(variables('lbID'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
+                }
+              ],
+              "loadBalancerInboundNatRules": [
+                {
+                  "id": "[concat(variables('lbID'), '/inboundNatRules/', 'guimgt',copyIndex())]"
+                },
+                {
+                  "id": "[concat(variables('lbID'), '/inboundNatRules/', 'sshmgt',copyIndex())]"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "tags": {
+        "displayName": "UDR NIC"
+      },
+      "copy": {
+        "count": "[parameters('numberOFBIGIPs')]",
+        "name": "niccopy"
+      },
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(variables('udrNICNamePrefix'), copyIndex())]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "enableIPForwarding": true,
+        "ipConfigurations": [
+          {
+            "name": "ipconfig",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnet-idInternal')]"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "tags": {
+        "displayName": "BIG-IP VM"
+      },
+      "copy": {
+        "count": "[parameters('numberOFBIGIPs')]",
+        "name": "vmcopy"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/',variables('externalNICNamePrefix'), copyIndex())]",
+        "[concat('Microsoft.Network/networkInterfaces/',variables('udrNICNamePrefix'), copyIndex())]"
+      ],
+      "type": "Microsoft.Compute/virtualMachines",
+      "name": "[concat(parameters('f5Name'),copyIndex())]",
+      "location": "[resourceGroup().location]",
+      "plan": {
+        "name": "[parameters('f5SKU')]",
+        "publisher": "f5-networks",
+        "product": "f5-big-ip"
+
+      },
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('avsetNamePrefix'))]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[parameters('f5Size')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('f5Name')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "f5-networks",
+            "offer": "f5-big-ip",
+            "sku": "[parameters('f5SKU')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "[concat(parameters('f5Name'), 'osDisk',copyIndex())]",
+            "vhd": {
+              "uri": "[concat(reference(concat('Microsoft.Storage/storageAccounts/',variables('newStorageAccountName')),providers('Microsoft.Storage', 'storageAccounts').apiVersions[0]).primaryEndpoints.blob,variables('newStorageAccountName'),'/',parameters('f5Name'),copyIndex(),'.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('externalNICNamePrefix'),copyIndex()))]",
+              "properties": {
+                "primary": true
+              }
+            },
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('udrNICNamePrefix'),copyIndex()))]",
+              "properties": {
+                "primary": false
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
