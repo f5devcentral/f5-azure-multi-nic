@@ -8,9 +8,6 @@ Deploy a Multi-NIC BIG-IP into Azure
 
 <<<<<<< HEAD
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ff5devcentral%2Ff5-azure-multi-nic%2Fmaster%2Fazuredeploy.json" target="_blank">
-=======
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ff5devcentral%2Ff5-azure-multi-nic%2Fmultiple-bigips%2Fazuredeploy.json" target="_blank">
->>>>>>> refs/remotes/origin/multiple-bigips
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
@@ -69,7 +66,7 @@ This template will deploy the following inside of either a new resource group or
 * F5 BIG-IP Virtual Machine
 
 ### During Deployment
-During Deployment there are �TWO� references to a resource group.  One is:
+During Deployment there are "TWO" references to a resource group.  One is:
  
 <img src="https://raw.githubusercontent.com/tstanley93/Azure-Multi-NIC/master/Azure-Multi-NIC/Azure-Multi-NIC/rg_01.jpg" />
 
