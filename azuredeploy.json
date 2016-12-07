@@ -228,62 +228,7 @@
           }
         ]
       }
-    },
-    {
-      "apiVersion": "2015-05-01-preview",
-      "tags": {
-        "displayName": "Network Security Group"
-      },
-      "type": "Microsoft.Network/networkSecurityGroups",
-      "name": "[concat(parameters('f5Name'), '-nsg')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "securityRules": [
-          {
-            "name": "mgt_rule",
-            "properties": {
-              "description": "",
-              "priority": 101,
-              "sourceAddressPrefix": "*",
-              "sourcePortRange": "*",
-              "destinationAddressPrefix": "*",
-              "destinationPortRange": "443",
-              "protocol": "Tcp",
-              "direction": "Inbound",
-              "access": "Allow"
-            }
-          },
-          {
-            "name": "ssh_rule",
-            "properties": {
-              "description": "",
-              "priority": 102,
-              "sourceAddressPrefix": "*",
-              "sourcePortRange": "*",
-              "destinationAddressPrefix": "*",
-              "destinationPortRange": "22",
-              "protocol": "Tcp",
-              "direction": "Inbound",
-              "access": "Allow"
-            }
-          },
-          {
-            "name": "app_rule_880",
-            "properties": {
-              "description": "",
-              "priority": 103,
-              "sourceAddressPrefix": "*",
-              "sourcePortRange": "*",
-              "destinationAddressPrefix": "*",
-              "destinationPortRange": "880",
-              "protocol": "Tcp",
-              "direction": "Inbound",
-              "access": "Allow"
-            }
-          }
-        ]
-      }
-    },
+    },    
     {
       "apiVersion": "2015-06-15",
       "tags": {
