@@ -89,6 +89,20 @@
         "6"
       ]
     },
+    "numberOfPublicIPAddresses": {
+      "type": "string",
+      "defaultValue": "1",
+      "metadata": {
+        "description": "By default one Public IP address is deployed.  Select up to 5 additional Public IP addresses to be deployed with these BIG-IP's."
+      },
+      "allowedValues": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ]
+    },
     "additionalSubnets":{
       "type": "string",
       "defaultValue": "",
@@ -111,11 +125,8 @@
   },
   "variables": {
     "avsetNamePrefix": "[concat(parameters('f5Name'),'-avset')]",
-    "vnetID": "[resourceId(parameters('vnetResourceGroupName'),'Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
-    "subnet-idInternal": "[concat(variables('vnetID'),'/subnets/',parameters('internalSubnetName'))]",
     "f5publicIPName": "[concat(parameters('f5Name'),'-IP')]",
     "newStorageAccountName": "[concat(parameters('f5Name'),'store')]",
-    "loadBalancerName": "[concat(parameters('f5Name'),'-ALB')]", 
     "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('f5publicIPName'))]",
     "skuHash": {
       "Good": "f5-bigip-virtual-edition-good-byol",
@@ -131,6 +142,13 @@
       "4": "[concat(variables('templateLocationPrefix'),'six_nic_bigip_vm.json')]",
       "5": "[concat(variables('templateLocationPrefix'),'seven_nic_bigip_vm.json')]",
       "6": "[concat(variables('templateLocationPrefix'),'eight_nic_bigip_vm.json')]"
+    },
+    "publiciphash" : {
+      "1": "[concat(variables('templateLocationPrefix'),'one_pip.json')]",
+      "2": "[concat(variables('templateLocationPrefix'),'two_pip.json')]",
+      "3": "[concat(variables('templateLocationPrefix'),'three_pip.json')]",
+      "4": "[concat(variables('templateLocationPrefix'),'four_pip.json')]",
+      "5": "[concat(variables('templateLocationPrefix'),'five_pip.json')]"
     }
   },
   "resources": [
@@ -160,141 +178,30 @@
       }
     },
     {
-      "apiVersion": "2015-05-01-preview",
-      "tags": {
-        "displayName": "Public IP Address"
-      },
-      "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[variables('f5publicIPName')]",
-      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-01-01",
+      "name": "ALBPIPTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('avsetNamePrefix'))]"
+      ],
       "properties": {
-        "publicIPAllocationMethod": "Dynamic",
-        "dnsSettings": {
-          "domainNameLabel": "[parameters('f5Name')]"
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('publiciphash')[parameters('numberOfPublicIPAddresses')]]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "f5Name": { "value": "[parameters('f5Name')]" }
         }
       }
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "tags": {
-        "displayName": "Network Security Group"
-      },
-      "type": "Microsoft.Network/networkSecurityGroups",
-      "name": "[concat(parameters('f5Name'), '-nsg')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "securityRules": [
-          {
-            "name": "mgt_rule",
-            "properties": {
-              "description": "",
-              "priority": 101,
-              "sourceAddressPrefix": "*",
-              "sourcePortRange": "*",
-              "destinationAddressPrefix": "*",
-              "destinationPortRange": "443",
-              "protocol": "Tcp",
-              "direction": "Inbound",
-              "access": "Allow"
-            }
-          },
-          {
-            "name": "ssh_rule",
-            "properties": {
-              "description": "",
-              "priority": 102,
-              "sourceAddressPrefix": "*",
-              "sourcePortRange": "*",
-              "destinationAddressPrefix": "*",
-              "destinationPortRange": "22",
-              "protocol": "Tcp",
-              "direction": "Inbound",
-              "access": "Allow"
-            }
-          },
-          {
-            "name": "app_rule_880",
-            "properties": {
-              "description": "",
-              "priority": 103,
-              "sourceAddressPrefix": "*",
-              "sourcePortRange": "*",
-              "destinationAddressPrefix": "*",
-              "destinationPortRange": "880",
-              "protocol": "Tcp",
-              "direction": "Inbound",
-              "access": "Allow"
-            }
-          }
-        ]
-      }
-    },    
-    {
-      "apiVersion": "2015-06-15",
-      "tags": {
-        "displayName": "Azure Load Balancer"
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('f5publicIPName'))]"
-      ],
-      "location": "[resourceGroup().location]",
-      "name": "[variables('loadBalancerName')]",
-      "properties": {
-        "frontendIPConfigurations": [
-          {
-            "name": "loadBalancerFrontEnd",
-            "properties": {
-              "publicIPAddress": {
-                "id": "[variables('publicIPID')]"
-              }
-            }
-          }
-        ],
-        "backendAddressPools": [
-          {
-            "name": "loadBalancerBackEnd"
-          }
-        ],
-        "loadBalancingRules": [
-          {
-            "name": "lbrule",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]"
-              },
-              "backendAddressPool": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
-              },
-              "probe": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe')]"
-              },
-              "protocol": "Tcp",
-              "frontendPort": 80,
-              "backendPort": 880,
-              "idleTimeoutInMinutes": 15
-            }
-          }
-        ],
-        "probes": [
-          {
-            "properties": {
-              "protocol": "Tcp",
-              "port": 880,
-              "intervalInSeconds": 15,
-              "numberOfProbes": 2
-            },
-            "name": "lbprobe"
-          }
-        ]
-      },
-      "type": "Microsoft.Network/loadBalancers"
     },
     {
       "apiVersion": "2015-01-01",
       "name": "InboundNATRuleTemplate",
       "type": "Microsoft.Resources/deployments",
       "dependsOn": [
-        "[concat('Microsoft.Network/loadBalancers/',variables('loadBalancerName'))]",
+        "[concat('Microsoft.Resources/deployments/', 'ALBPIPTemplate')]",
         "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]",
         "[concat('Microsoft.Compute/availabilitySets/', variables('avsetNamePrefix'))]"
       ],
