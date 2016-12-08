@@ -244,10 +244,6 @@
           {
             "name": "loadBalancerFrontEnd",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
-              "subnet": {
-                "id": "[variables('subnet-idInternal')]"
-              },
               "publicIPAddress": {
                 "id": "[variables('publicIPID')]"
               }
