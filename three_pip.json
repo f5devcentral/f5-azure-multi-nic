@@ -66,7 +66,7 @@
             }
           },
           {
-            "name": "loadBalancerFrontEnd1",
+            "name": "loadBalancerFrontEnd2",
             "properties": {
               "publicIPAddress": {
                 "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('f5publicIPName'),2))]"
