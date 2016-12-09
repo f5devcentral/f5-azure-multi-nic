@@ -22,7 +22,7 @@
       },
       "type": "Microsoft.Network/publicIPAddresses",
       "copy": {
-        "count": 2,
+        "count": 4,
         "name": "pipcopy"
       },
       "name": "[concat(variables('f5publicIPName'),copyIndex())]",
@@ -60,6 +60,22 @@
             "properties": {
               "publicIPAddress": {
                 "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('f5publicIPName'),1))]"
+              }
+            }
+          },
+          {
+            "name": "loadBalancerFrontEnd1",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('f5publicIPName'),2))]"
+              }
+            }
+          },
+          {
+            "name": "loadBalancerFrontEnd1",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('f5publicIPName'),3))]"
               }
             }
           }
