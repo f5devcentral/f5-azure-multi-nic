@@ -30,7 +30,7 @@
       "properties": {
         "publicIPAllocationMethod": "Dynamic",
         "dnsSettings": {
-          "domainNameLabel": "[concat(variables('f5publicIPName'),copyIndex())]"
+          "domainNameLabel": "[concat(parameters('f5Name'),'ip',copyIndex())]"
         }
       }
     },
