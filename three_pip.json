@@ -41,7 +41,9 @@
         "displayName": "Azure Load Balancer"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('f5publicIPName'))]"
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('f5publicIPName'),0)]",
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('f5publicIPName'),1)]",
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('f5publicIPName'),2)]"
       ],
       "location": "[resourceGroup().location]",
       "name": "[variables('loadBalancerName')]",
