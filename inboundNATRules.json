@@ -25,7 +25,7 @@
   "variables": {
     "loadBalancerName": "[concat(parameters('f5Name'),'-ALB')]",
     "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
-    "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd')]",
+    "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/loadBalancerFrontEnd0')]"
   },
   "resources": [
     {
