@@ -121,7 +121,7 @@
               },
               "protocol": "Tcp",
               "frontendPort": 80,
-              "backendPort": 880,
+              "backendPort": 881,
               "idleTimeoutInMinutes": 15
             }
           },
@@ -139,7 +139,7 @@
               },
               "protocol": "Tcp",
               "frontendPort": 80,
-              "backendPort": 880,
+              "backendPort": 882,
               "idleTimeoutInMinutes": 15
             }
           },
@@ -157,7 +157,7 @@
               },
               "protocol": "Tcp",
               "frontendPort": 80,
-              "backendPort": 880,
+              "backendPort": 883,
               "idleTimeoutInMinutes": 15
             }
           }
@@ -176,7 +176,7 @@
             "name": "lbprobe1",
             "properties": {
               "protocol": "Tcp",
-              "port": 880,
+              "port": 881,
               "intervalInSeconds": 15,
               "numberOfProbes": 2
             }            
@@ -185,7 +185,7 @@
             "name": "lbprobe2",
             "properties": {
               "protocol": "Tcp",
-              "port": 880,
+              "port": 882,
               "intervalInSeconds": 15,
               "numberOfProbes": 2
             }            
@@ -194,7 +194,7 @@
             "name": "lbprobe3",
             "properties": {
               "protocol": "Tcp",
-              "port": 880,
+              "port": 883,
               "intervalInSeconds": 15,
               "numberOfProbes": 2
             }            

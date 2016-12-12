@@ -103,7 +103,7 @@
               },
               "protocol": "Tcp",
               "frontendPort": 80,
-              "backendPort": 880,
+              "backendPort": 881,
               "idleTimeoutInMinutes": 15
             }
           }
@@ -122,7 +122,7 @@
             "name": "lbprobe1",
             "properties": {
               "protocol": "Tcp",
-              "port": 880,
+              "port": 881,
               "intervalInSeconds": 15,
               "numberOfProbes": 2
             }            
