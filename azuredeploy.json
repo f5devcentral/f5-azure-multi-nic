@@ -103,6 +103,13 @@
         "5"
       ]
     },
+    "clustering" : {
+      "type": "string",
+      "defaultValue": "no",
+      "metadata": {
+        "description" : "If you are deploying more than one BIG-IP and would like to have these automatically clustered for you, choose yes."
+      }
+    },
     "additionalSubnets":{
       "type": "string",
       "defaultValue": "",
