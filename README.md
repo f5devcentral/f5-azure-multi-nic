@@ -11,7 +11,7 @@ Deploy a Multi-NIC BIG-IP into Azure
 </a>
 
 ### Description:
-This template will allow you to deploy more than one F5 BIG-IP into Azure with 2 or more network interfaces.  Remember that the total number of interfaces that can be deployed is predicated on the number of NIC objects supported by the underlying Virtual Instance Size.  If you choose to deploy on an instance size that only supports 2 NIC's for example but you request that 4 NIC's be cretaed from this template, then template deployment will fail.  Please see this [link](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes/#size-tables) to determine the Virtual Instances Sizes and the number of NIC's that are supported.
+This template allows you to deploy more than one F5 BIG-IP into Azure with 2 or more network interfaces.  Remember that the total number of interfaces that can be deployed is predicated on the number of NIC objects supported by the underlying Virtual Instance Size.  If you choose to deploy on an instance size that only supports 2 NIC's for example but you request that 4 NIC's be cretaed from this template, then template deployment will fail.  Please see this [link](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes/#size-tables) to determine the Virtual Instances Sizes and the number of NIC's that are supported.
 
 ### Parameter Definitions: ###
 
