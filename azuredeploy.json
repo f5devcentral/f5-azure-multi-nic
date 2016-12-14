@@ -148,7 +148,7 @@
       "Better": "f5-bigip-virtual-edition-better-byol",
       "Best": "f5-bigip-virtual-edition-best-byol"
     },
-    "templateLocationPrefix": "https://raw.githubusercontent.com/f5devcentral/f5-azure-multi-nic/multi-pip/",
+    "templateLocationPrefix": "https://raw.githubusercontent.com/f5devcentral/f5-azure-multi-nic/onboard/",
     "bigipHash": {
       "0": "[concat(variables('templateLocationPrefix'),'two_nic_bigip_vm.json')]",
       "1": "[concat(variables('templateLocationPrefix'),'three_nic_bigip_vm.json')]",
