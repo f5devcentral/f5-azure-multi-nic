@@ -3,23 +3,10 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "f5Name": {
-      "type": "string",
-      "defaultValue": "bigip",
-      "metadata": {
-        "description": "The Unique Name of the BIG-IP instance, that will be used for the Public DNS Name of the Public IP."
-      }
+      "type": "string"
     },
     "numberOFBIGIPs": {
-      "type": "int",
-      "metadata": {
-        "description": "The total number of BIG-IP's (Up to 4) you want to deploy."
-      },
-      "allowedValues": [
-        1,
-        2,
-        3,
-        4
-      ]
+      "type": "int"
     }
   },
   "variables": {
