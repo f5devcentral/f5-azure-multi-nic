@@ -32,9 +32,6 @@
       "name": "[concat(parameters('f5Name'),copyIndex(),'/start')]",
       "apiVersion": "2016-03-30",
       "location": "[resourceGroup().location]",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('f5Name'),copyIndex())]"
-      ],
       "properties": {
         "publisher": "Microsoft.Azure.Extensions",
         "type": "CustomScript",
