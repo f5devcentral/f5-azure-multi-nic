@@ -108,6 +108,16 @@
       "defaultValue": "no",
       "metadata": {
         "description" : "If you are deploying more than one BIG-IP and would like to have these automatically clustered for you, choose yes."
+      },
+      "allowedValues": [
+        "Yes",
+        "No"
+      ]
+    },
+    "licenseKeys" : {
+      "type": "string",
+      "metadata": {
+        "description": "A semi-colon delimited string of BYOL License Keys, one for each of the BIG-IP you intend to deploy. (No Spaces) "
       }
     },
     "additionalSubnets":{
@@ -154,6 +164,10 @@
       "3": "[concat(variables('templateLocationPrefix'),'three_pip.json')]",
       "4": "[concat(variables('templateLocationPrefix'),'four_pip.json')]",
       "5": "[concat(variables('templateLocationPrefix'),'five_pip.json')]"
+    },
+    "clusterMap" : {
+      "Yes": "[concat(variables('templateLocationPrefix'),'yes-cluster_onboard.json')]",
+      "No": "[concat(variables('templateLocationPrefix'),'no-cluster_onboard.json')]"
     }
   },
   "resources": [
@@ -304,6 +318,28 @@
           "externalSubnetName": { "value": "[parameters('externalSubnetName')]" },
           "internalSubnetName": { "value": "[parameters('internalSubnetName')]" },
           "additionalSubnets": { "value": "[parameters('additionalSubnets')]"}
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-01-01",
+      "name": "OnBoardingTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', 'BIGIPTemplate')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('clusterMap')[parameters('clustering')]]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "f5Name": { "value": "[parameters('f5Name')]" },
+          "numberOFBIGIPs": { "value": "[parameters('numberOFBIGIPs')]" },
+          "licenseKeys": { "value": "[parameters('licenseKeys')]" },
+          "clustering": { "value": "[parameters('clustering')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" }
         }
       }
     }
