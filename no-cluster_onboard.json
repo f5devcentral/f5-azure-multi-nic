@@ -16,7 +16,7 @@
     },
     "adminPassword": {
       "type": "securestring"
-    },
+    }
   },
   "variables": {
     "f5CloudLibsTag": "v1.0.0",
@@ -42,9 +42,7 @@
              "[concat('https://api.github.com/repos/F5Networks/f5-cloud-libs/tarball/', variables('f5CloudLibsTag'))]",
              "https://raw.githubusercontent.com/f5devcentral/f5-azure-multi-nic/onboard/start.sh"
           ],
-          "protectedSettings": {
-            "commandToExecute": "[concat('bash start.sh',' -p ',parameters('adminPassword'), ' -h ',parameters('f5Name'),copyIndex(),' -l ',resourceGroup().location,' -k ',variables('licenseKeys')[copyIndex()],' -y ',parameters('clustering'))]"
-          }            
+          "commandToExecute": "[concat('bash start.sh',' -p ',parameters('adminPassword'), ' -h ',parameters('f5Name'),copyIndex(),' -l ',resourceGroup().location,' -k ',variables('licenseKeys')[copyIndex()],' -y ',parameters('clustering'))]"     
         }
       }
      }       
