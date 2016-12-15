@@ -65,8 +65,5 @@ mydg=$(ip route get 1 | awk '{print $3;exit}')
 f5-rest-node ./runScripts.js
 
 ## Execute the CloudLibs
-if [ ${yesNo} = "yes" ]; then
-    echo "You Picked Yes."
-else
-    f5-rest-node ./config/f5-cloud-libs/scripts/azure/network.js --output /var/log/network.log --host ${hostname} -u admin -p ${adminpass} --multi-nic --default-gw ${mydg} --vlan vlan_mgmt,1.0 --self-ip self_mgmt,${myip},vlan_mgmt --log-level debug --background --force-reboot
-fi
+f5-rest-node ./config/f5-cloud-libs/scripts/azure/network.js --output /var/log/network.log --host ${hostname} -u admin -p ${adminpass} --multi-nic --default-gw ${mydg} --vlan vlan_mgmt,1.0 --self-ip self_mgmt,${myip},vlan_mgmt --log-level debug --background --force-reboot --signal NET_DONE
+f5-rest-node ./config/f5-cloud-libs/scripts/azure/onboard.js --wait-for NET_DONE --output /var/log/onboard.log --log-level debug --host ${myip} -u admin -p ${adminpass} --hostname ${hostname}.${location}.cloudapp.azure.com --set-password admin:${adminpass} --license ${licenseKey} --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --signal ONBOARD_DONE
