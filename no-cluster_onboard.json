@@ -29,7 +29,7 @@
         "count": "[parameters('numberOFBIGIPs')]",
         "name": "vmcopy"
       },
-      "name": "[concat(parameters('f5Name'),copyIndex(),'/start')]",
+      "name": "[concat(parameters('f5Name'),copyIndex(),'/no_start')]",
       "apiVersion": "2016-03-30",
       "location": "[resourceGroup().location]",
       "properties": {
