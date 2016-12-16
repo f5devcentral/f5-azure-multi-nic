@@ -32,7 +32,7 @@
 ## defaultGw (get this in this script)
 
 # Parse the command line arguments, primarily checking full params as short params are just placeholders
-while getopts ":phlky" opt; do
+while getopts ":p:h:l:k:y:" opt; do
   case $opt in
     p)
       adminpass=$OPTARG
