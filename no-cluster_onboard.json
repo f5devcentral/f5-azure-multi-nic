@@ -19,7 +19,7 @@
     }
   },
   "variables": {
-    "f5CloudLibsTag": "v1.0.0",
+    "f5CloudLibsTag": "v1.2.0",
     "licenseKeys" : "[split(parameters('licenseKeys'),';')]"
   },
   "resources": [ 
