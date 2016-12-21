@@ -3,25 +3,35 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "f5Name": {
-      "type": "string",
-      "defaultValue": "bigip",
-      "metadata": {
-        "description": "The Unique Name of the BIG-IP instance, that will be used for the Public DNS Name of the Public IP."
-      }
+      "type": "string"
+    },
+    "numberOFBIGIPs": {
+      "type": "int"      
+    },
+    "licenseKeys" : {
+      "type": "string"
+    },
+    "clustering" : {
+      "type": "string"
+    },
+    "adminPassword": {
+      "type": "securestring"
     }
   },
   "variables": {
-    "f5publicIPName": "[concat(parameters('f5Name'),'-IP')]"
+    "f5CloudLibsTag": "v1.2.0",
+    "licenseKeys" : "[split(parameters('licenseKeys'),';')]"
   },
   "resources": [ 
       {
       "type": "Microsoft.Compute/virtualMachines/extensions",
-      "name": "[concat(parameters('instanceName'),'/start')]",
+      "copy": {
+        "count": "[parameters('numberOFBIGIPs')]",
+        "name": "vmcopy"
+      },
+      "name": "[concat(parameters('f5Name'),copyIndex(),'/no_start')]",
       "apiVersion": "2016-03-30",
-      "location": "[variables('location')]",
-      "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('instanceName'))]"
-      ],
+      "location": "[resourceGroup().location]",
       "properties": {
         "publisher": "Microsoft.Azure.Extensions",
         "type": "CustomScript",
@@ -29,11 +39,14 @@
         "settings": {
           "fileUris": [
              "[concat('https://raw.githubusercontent.com/F5Networks/f5-cloud-libs/', variables('f5CloudLibsTag'), '/scripts/azure/runScripts.js')]",
-             "[concat('https://api.github.com/repos/F5Networks/f5-cloud-libs/tarball/', variables('f5CloudLibsTag'))]"
-          ],
-          "commandToExecute": "[concat('f5-rest-node ./runScripts.js --log-level debug --tag ', variables('f5CloudLibsTag'), ' --onboard \" --output /var/log/onboard.log --log-level debug --host ', variables('subnet1PrivateAddress'), ' -u admin -p ', parameters('adminPassword'), ' --hostname ', concat(parameters('instanceName'), '.', resourceGroup().location, '.cloudapp.azure.com'), ' --set-password admin:', parameters('adminPassword'), ' --license ', parameters('licenseKey1'), ' --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --module afm:none --signal ONBOARD_DONE \"', ' --network \" --wait-for ONBOARD_DONE --output /var/log/network.log --host ', variables('subnet1PrivateAddress'), ' -u admin -p ', parameters('adminPassword'), ' --multi-nic --default-gw ', variables('defaultGw'), ' --vlan vlan_mgmt,1.0 --vlan vlan_1,1.1 --self-ip self_mgmt,', variables('subnet1PrivateAddress'), ',vlan_mgmt --self-ip self_1,', variables('subnet2PrivateAddress'), ',vlan_1 --log-level debug --background --force-reboot --signal NETWORK_DONE \"')]"
+             "[concat('https://api.github.com/repos/F5Networks/f5-cloud-libs/tarball/', variables('f5CloudLibsTag'))]",
+             "https://raw.githubusercontent.com/f5devcentral/f5-azure-multi-nic/onboard/no_start.sh"
+          ]
+        },
+      "protectedSettings": {
+          "commandToExecute": "[concat('bash ./no_start.sh',' -p ',parameters('adminPassword'), ' -h ',parameters('f5Name'),copyIndex(),' -l ',resourceGroup().location,' -k ',variables('licenseKeys')[copyIndex()],' -y ',parameters('clustering'))]"     
         }
-      }
-     }       
+        }
+      }            
   ]
 }
