@@ -50,6 +50,9 @@
         "count": "[parameters('numberOFBIGIPs')]",
         "name": "vmcopy"
       },
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/extensions/', parameters('f5Name'),'0/yes_primary_start')]"
+      ],
       "name": "[concat(parameters('f5Name'),copyIndex(1),'/yes_secondary_start')]",
       "apiVersion": "2016-03-30",
       "location": "[resourceGroup().location]",
