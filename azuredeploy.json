@@ -166,7 +166,7 @@
       "5": "[concat(variables('templateLocationPrefix'),'five_pip.json')]"
     },
     "clusterMap" : {
-      "Yes": "[concat(variables('templateLocationPrefix'),'yes-cluster_onboard.json')]",
+      "Yes": "[concat(variables('templateLocationPrefix'),'yes-cluster_onboarding.json')]",
       "No": "[concat(variables('templateLocationPrefix'),'no-cluster_onboard.json')]"
     }
   },
