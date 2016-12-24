@@ -52,7 +52,6 @@
         "name": "vmcopy"
       },
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/extensions/',variables('primaryName'),'/extensions/yes_primary_start')]"
       ],
       "name": "[concat(parameters('f5Name'),copyIndex(1),'/yes_secondary_start')]",
       "apiVersion": "2016-03-30",
