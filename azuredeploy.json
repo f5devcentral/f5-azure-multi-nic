@@ -81,7 +81,7 @@
     },
     "f5Size": {
       "type": "string",
-      "defaultValue": "Standard_F2s",
+      "defaultValue": "Standard_A2_v2",
       "allowedValues": [
         "Standard_A2_v2",
         "Standard_A4_v2",
@@ -241,7 +241,7 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
       "properties": {
-        "accountType": "Premium_LRS"
+        "accountType": "Standard_LRS"
       }
     },
     {
