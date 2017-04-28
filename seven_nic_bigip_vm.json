@@ -20,6 +20,9 @@
     "f5SKU": {
       "type": "string"
     },
+    "f5version": {
+      "type": "string"
+    },
     "vnetResourceGroupName": {
       "type": "string"
     },
@@ -296,7 +299,7 @@
             "publisher": "f5-networks",
             "offer": "f5-big-ip",
             "sku": "[parameters('f5SKU')]",
-            "version": "latest"
+            "version": "[parameters('f5version')]"
           },
           "osDisk": {
             "name": "[concat(parameters('f5Name'), 'osDisk',copyIndex())]",

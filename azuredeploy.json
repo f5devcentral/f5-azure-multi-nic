@@ -33,7 +33,18 @@
         "description": "The Unique Name of the BIG-IP instance, that will be used for the Public DNS Name of the Public IP."
       }
     },
-    "f5SKU": {
+    "f5LicenseType": {
+      "type": "string",
+      "defaultValue": "Hourly",
+      "allowedValues": [
+        "BYOL",
+        "Hourly"
+      ],
+      "metadata": {
+        "description": "Choose the license type for the F5 BIG-IP you wish to deploy.  BYOL, or Hourly"
+      }
+    },
+    "f5FeatureSet": {
       "type": "string",
       "defaultValue": "Best",
       "allowedValues": [
@@ -42,19 +53,54 @@
         "Best"
       ],
       "metadata": {
-        "description": "Choose the SKU of F5 BIG-IP you wish to deploy.  Good, Better, Best"
+        "description": "Choose the feature set for the F5 BIG-IP you wish to deploy.  Good, Better, Best"
+      }
+    },
+    "f5ThroughPutLevel": {
+      "type": "string",
+      "defaultValue": "200m",
+      "allowedValues": [
+        "25m",
+        "200m",
+        "1g"
+      ],
+      "metadata": {
+        "description": "Choose the throughput level for the F5 BIG-IP you wish to deploy.  25Mbps, 200Mbps, 1Gbps"
+      }
+    },
+    "f5Version": {
+      "type": "string",
+      "defaultValue": "13.0.0",
+      "allowedValues": [
+        "12.1.2",
+        "13.0.0"
+      ],
+      "metadata": {
+        "description": "Choose the version of the F5 BIG-IP you wish to deploy.  12.1.2, 13.0.0"
       }
     },
     "f5Size": {
       "type": "string",
       "defaultValue": "Standard_F2s",
       "allowedValues": [
-        "Standard_DS2_v2",
-        "Standard_DS3_v2",
-        "Standard_DS4_v2",
-        "Standard_F2s",
-        "Standard_F4s",
-        "Standard_F8s"
+        "Standard_A2_v2",
+        "Standard_A4_v2",
+        "Standard_A8_v2",
+        "Standard_D2",
+        "Standard_D3",
+        "Standard_D4",
+        "Standard_D11",
+        "Standard_D12",
+        "Standard_D13",
+        "Standard_D14",
+        "Standard_A8_v2",
+        "Standard_D3_v2",
+        "Standard_D4_v2",
+        "Standard_D5_v2",
+        "Standard_D11_v2",
+        "Standard_D12_v2",
+        "Standard_13_v2",
+        "Standard_D14_v2"
       ],
       "metadata": {
         "description": "The size of the BIG-IP Instance."
@@ -117,7 +163,7 @@
     "licenseKeys" : {
       "type": "string",
       "metadata": {
-        "description": "A semi-colon delimited string of BYOL License Keys, one for each of the BIG-IP you intend to deploy. (No Spaces) "
+        "description": "A semi-colon delimited string of BYOL License Keys, one for each of the BIG-IP you intend to deploy. (No Spaces) Leave Blank for Hourly"
       }
     },
     "additionalSubnets":{
@@ -143,10 +189,23 @@
   "variables": {
     "avsetNamePrefix": "[concat(parameters('f5Name'),'-avset')]",
     "newStorageAccountName": "[concat(parameters('f5Name'),'store')]",
-    "skuHash": {
-      "Good": "f5-bigip-virtual-edition-good-byol",
-      "Better": "f5-bigip-virtual-edition-better-byol",
-      "Best": "f5-bigip-virtual-edition-best-byol"
+    "skuBase": "f5-bigip-virtual-edition-",
+    "f5FeatureSetHash": {
+      "Good": "good",
+      "Better": "better",
+      "Best": "best"
+    },
+    "f5sku": {
+      "BYOL": "[concat(variables('skuBase'),variables('f5FeatureSetHash')[parameters('f5FeatureSet')],'-byol')]",
+      "Hourly": "[concat(variables('skuBase'),parameters('f5ThroughPutLevel'),variables('f5FeatureSetHash')[parameters('f5FeatureSet')],'-byol')]"
+    },
+    "f5version12": {
+      "BYOL": "1",
+      "Hourly": "2"
+    },
+    "f5version": {
+      "12.1.2": "[concat('12.1.2',variables('f5version12')[parameters('f5LicenseType')])]",
+      "13.0.0": "13.0.000"
     },
     "templateLocationPrefix": "https://raw.githubusercontent.com/f5devcentral/f5-azure-multi-nic/onboard/",
     "bigipHash": {
@@ -312,7 +371,8 @@
           "numberOFBIGIPs": { "value": "[parameters('numberOFBIGIPs')]" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
           "adminPassword": { "value": "[parameters('adminPassword')]" },
-          "f5SKU": { "value": "[variables('skuHash')[parameters('f5SKU')]]" },
+          "f5SKU": { "value": "[variables('f5sku')[parameters('f5LicenseType')]]" },
+          "f5version": { "value": "[variables('f5version')[parameters('f5Version')]]" },
           "vnetResourceGroupName": { "value": "[toLower(parameters('vnetResourceGroupName'))]" },
           "vnetName": { "value": "[parameters('vnetName')]" },
           "externalSubnetName": { "value": "[parameters('externalSubnetName')]" },
