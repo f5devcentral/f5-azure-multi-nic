@@ -24,19 +24,14 @@
 ###########################################################################
 
 ### Parameter Legend  ###
-## subnet1PrivateAddress (get this in this script)
-## adminPassword
 ## hostname
 ## location
 ## licenseKeys
-## defaultGw (get this in this script)
+## port
 
 # Parse the command line arguments, primarily checking full params as short params are just placeholders
-while getopts ":p:h:l:k:y:" opt; do
+while getopts ":h:l:k:o:" opt; do
   case $opt in
-    p)
-      adminpass=$OPTARG
-      ;;
     h)
       hostname=$OPTARG
       ;;
@@ -46,8 +41,8 @@ while getopts ":p:h:l:k:y:" opt; do
     k)
       licenseKey=$OPTARG
       ;;
-    y)
-      yesNo=$OPTARG
+    o)
+      port=$OPTARG
       set -x
       ;;
   esac
@@ -60,4 +55,9 @@ myip=$(ip route get 1 | awk '{print $NF;exit}')
 mydg=$(ip route get 1 | awk '{print $3;exit}')
 
 ## Execute the CloudLibs
-exec f5-rest-node ./runScripts.js --log-level debug --tag v1.2.0 --onboard "--output /var/log/onboard.log --log-level debug --host ${myip} -u admin -p ${adminpass} --hostname ${hostname}.${location}.cloudapp.azure.com -l ${licenseKey} --set-password admin:${adminpass} --db tmm.maxremoteloglength:2048 --module ltm:nominal --signal ONBOARD_DONE" --network "--wait-for ONBOARD_DONE --log-level debug --output /var/log/network.log --host ${myip} -u admin -p ${adminpass} --multi-nic --default-gw ${mydg} --vlan external,1.0 --vlan internal,1.1 --self-ip external_ip,${myip},external --log-level debug --background --force-reboot --signal NETWORK_DONE" --cluster " --wait-for NETWORK_DONE --output /var/log/cluster.log --log-level debug --host ${myip} -u admin -p ${adminpass} --config-sync-ip ${myip} --create-group --device-group Sync --sync-type sync-failover --device ${hostname} --auto-sync --save-on-auto-sync"
+#--network "--wait-for ONBOARD_DONE --log-level debug --output /var/log/network.log --host ${myip} -u admin -p ${adminpass} --multi-nic --default-gw ${mydg} --vlan external,1.0 --vlan internal,1.1 --self-ip external_ip,${myip},external --log-level debug --background --force-reboot --signal NETWORK_DONE" 
+#--cluster " --wait-for NETWORK_DONE --output /var/log/cluster.log --log-level debug --host ${myip} -u admin -p ${adminpass} --config-sync-ip ${myip} --create-group --device-group Sync --sync-type sync-failover --device ${hostname} --auto-sync --save-on-auto-sync"
+
+
+exec /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js "--output /var/log/onboard.log --log-level debug --host ${myip} --port ${port} -u admin --password-url file:///config/cloud/passwd --hostname ${hostname}.${location}.cloudapp.azure.com --license ${licenseKey} --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal"
+rm -f /config/cloud/passwd

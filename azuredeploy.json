@@ -149,17 +149,6 @@
         "5"
       ]
     },
-    "clustering" : {
-      "type": "string",
-      "defaultValue": "no",
-      "metadata": {
-        "description" : "If you are deploying more than one BIG-IP and would like to have these automatically clustered for you, choose yes."
-      },
-      "allowedValues": [
-        "Yes",
-        "No"
-      ]
-    },
     "licenseKeys" : {
       "type": "string",
       "metadata": {
@@ -224,9 +213,9 @@
       "4": "[concat(variables('templateLocationPrefix'),'four_pip.json')]",
       "5": "[concat(variables('templateLocationPrefix'),'five_pip.json')]"
     },
-    "clusterMap" : {
-      "Yes": "[concat(variables('templateLocationPrefix'),'yes-cluster_onboarding.json')]",
-      "No": "[concat(variables('templateLocationPrefix'),'no-cluster_onboard.json')]"
+    "onboardMap" : {
+      "BYOL": "[concat(variables('templateLocationPrefix'),'byol_onboarding.json')]",
+      "Hourly": "[concat(variables('templateLocationPrefix'),'hourly_onboarding.json')]"
     }
   },
   "resources": [
@@ -391,15 +380,15 @@
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[variables('clusterMap')[parameters('clustering')]]",
+          "uri": "[variables('onboardMap')[parameters('f5LicenseType')]]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
           "f5Name": { "value": "[parameters('f5Name')]" },
           "numberOFBIGIPs": { "value": "[parameters('numberOFBIGIPs')]" },
           "licenseKeys": { "value": "[parameters('licenseKeys')]" },
-          "clustering": { "value": "[parameters('clustering')]" },
-          "adminPassword": { "value": "[parameters('adminPassword')]" }
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "f5version": { "value": "[parameters('f5version')]" }
         }
       }
     }
