@@ -190,5 +190,39 @@
         }
       }
     }
-  ]
+  ],
+  "outputs": {
+    "masterExternalIp": {
+        "value": "[reference(concat(variables('externalNICNamePrefix'),0)).ipConfigurations[0].properties.privateIPAddress]",
+        "type": "string"
+     },
+     "masterUdrIp": {
+        "value": "[reference(concat(variables('udrNICNamePrefix'),0)).ipConfigurations[0].properties.privateIPAddress]",
+        "type": "string"
+     },
+     "slave1ExternalIp": {
+        "value": "[reference(concat(variables('externalNICNamePrefix'),1)).ipConfigurations[0].properties.privateIPAddress]",
+        "type": "string"
+     },
+     "slave1UdrIp": {
+        "value": "[reference(concat(variables('udrNICNamePrefix'),1)).ipConfigurations[0].properties.privateIPAddress]",
+        "type": "string"
+     },
+     "slave2ExternalIp": {
+        "value": "[reference(concat(variables('externalNICNamePrefix'),2)).ipConfigurations[0].properties.privateIPAddress]",
+        "type": "string"
+     },
+     "slave2UdrIp": {
+        "value": "[reference(concat(variables('udrNICNamePrefix'),2)).ipConfigurations[0].properties.privateIPAddress]",
+        "type": "string"
+     },
+     "slave3ExternalIp": {
+        "value": "[reference(concat(variables('externalNICNamePrefix'),3)).ipConfigurations[0].properties.privateIPAddress]",
+        "type": "string"
+     },
+     "slave3UdrIp": {
+        "value": "[reference(concat(variables('udrNICNamePrefix'),3)).ipConfigurations[0].properties.privateIPAddress]",
+        "type": "string"
+     }
+  }
 }
