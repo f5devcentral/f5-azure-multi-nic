@@ -13,9 +13,6 @@
     },
     "adminPassword": {
       "type": "securestring"
-    },
-    "templateLocationPrefix": {
-      "type": "securestring"
     }
   },
   "variables": {
@@ -49,7 +46,7 @@
           ]
         },
       "protectedSettings": {
-          "commandToExecute": "[concat('bash ./no_start.sh',' -p ',parameters('adminPassword'), ' -h ',parameters('f5Name'),copyIndex(),' -l ',resourceGroup().location,' -k ',variables('licenseKeys')[copyIndex()],' -y ',parameters('clustering'))]"     
+          "commandToExecute": "[concat('bash ./no_start.sh',' -p ',parameters('adminPassword'), ' -h ',parameters('f5Name'),copyIndex(),' -l ',resourceGroup().location,' -k ',variables('licenseKeys')[copyIndex()])]"     
         }
         }
       }            
