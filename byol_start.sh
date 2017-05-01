@@ -59,5 +59,5 @@ mydg=$(ip route get 1 | awk '{print $3;exit}')
 #--cluster " --wait-for NETWORK_DONE --output /var/log/cluster.log --log-level debug --host ${myip} -u admin -p ${adminpass} --config-sync-ip ${myip} --create-group --device-group Sync --sync-type sync-failover --device ${hostname} --auto-sync --save-on-auto-sync"
 
 
-exec /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js "--output /var/log/onboard.log --log-level debug --host ${myip} --port ${port} -u admin --password-url file:///config/cloud/passwd --hostname ${hostname}.${location}.cloudapp.azure.com --license ${licenseKey} --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal"
+exec /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ${myip} --port ${port} -u admin --password-url file:///config/cloud/passwd --hostname ${hostname}.${location}.cloudapp.azure.com --license ${licenseKey} --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal
 rm -f /config/cloud/passwd
