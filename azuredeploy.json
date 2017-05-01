@@ -151,6 +151,7 @@
     },
     "licenseKeys" : {
       "type": "string",
+      "defaultValue": "",
       "metadata": {
         "description": "A semi-colon delimited string of BYOL License Keys, one for each of the BIG-IP you intend to deploy. (No Spaces) Leave Blank for Hourly"
       }
@@ -186,11 +187,15 @@
     },
     "f5sku": {
       "BYOL": "[concat(variables('skuBase'),variables('f5FeatureSetHash')[parameters('f5FeatureSet')],'-byol')]",
-      "Hourly": "[concat(variables('skuBase'),parameters('f5ThroughPutLevel'),variables('f5FeatureSetHash')[parameters('f5FeatureSet')],'-byol')]"
+      "Hourly": "[concat(variables('skuBase'),parameters('f5ThroughPutLevel'),'-',variables('f5FeatureSetHash')[parameters('f5FeatureSet')],'-hourly')]"
     },
     "f5version12": {
       "BYOL": "1",
       "Hourly": "2"
+    },
+    "f5Offer": {
+      "BYOL": "f5-big-ip",
+      "Hourly": "f5-big-ip-hourly"
     },
     "f5version": {
       "12.1.2": "[concat('12.1.2',variables('f5version12')[parameters('f5LicenseType')])]",
@@ -360,6 +365,7 @@
           "numberOFBIGIPs": { "value": "[parameters('numberOFBIGIPs')]" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
           "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "f5Offer": {"value": "[variables('f5Offer')[parameters('f5LicenseType')]]"},
           "f5SKU": { "value": "[variables('f5sku')[parameters('f5LicenseType')]]" },
           "f5version": { "value": "[variables('f5version')[parameters('f5Version')]]" },
           "vnetResourceGroupName": { "value": "[toLower(parameters('vnetResourceGroupName'))]" },

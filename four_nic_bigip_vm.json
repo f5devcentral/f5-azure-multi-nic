@@ -17,6 +17,9 @@
     "adminPassword": {
       "type": "securestring"
     },
+    "f5Offer": {
+      "type": "string"
+    },
     "f5SKU": {
       "type": "string"
     },
@@ -198,7 +201,7 @@
       "plan": {
         "name": "[parameters('f5SKU')]",
         "publisher": "f5-networks",
-        "product": "f5-big-ip"
+        "product": "[parameters('f5Offer')]"
 
       },
       "properties": {
@@ -216,7 +219,7 @@
         "storageProfile": {
           "imageReference": {
             "publisher": "f5-networks",
-            "offer": "f5-big-ip",
+            "offer": "[parameters('f5Offer')]",
             "sku": "[parameters('f5SKU')]",
             "version": "[parameters('f5version')]"
           },
