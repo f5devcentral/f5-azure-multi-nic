@@ -8,6 +8,9 @@
     "numberOFBIGIPs": {
       "type": "int"      
     },
+    "licenseKeys" : {
+      "type": "string"
+    },
     "adminPassword": {
       "type": "securestring"
     },
