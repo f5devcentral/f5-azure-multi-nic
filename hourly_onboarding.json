@@ -9,7 +9,8 @@
       "type": "int"      
     },
     "licenseKeys" : {
-      "type": "string"
+      "type": "string",
+      "defaultValue": ""
     },
     "adminPassword": {
       "type": "securestring"
