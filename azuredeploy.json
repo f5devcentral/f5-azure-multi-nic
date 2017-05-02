@@ -193,6 +193,10 @@
       "BYOL": "1",
       "Hourly": "2"
     },
+    "f5versionport": {
+      "12.1.2": "443",
+      "13.0.0": "8443"
+    },
     "f5Offer": {
       "BYOL": "f5-big-ip",
       "Hourly": "f5-big-ip-hourly"
@@ -267,7 +271,7 @@
               "sourceAddressPrefix": "*",
               "sourcePortRange": "*",
               "destinationAddressPrefix": "*",
-              "destinationPortRange": "443",
+              "destinationPortRange": "[variables('f5versionport')[parameters('f5version')]]",
               "protocol": "Tcp",
               "direction": "Inbound",
               "access": "Allow"
@@ -340,7 +344,8 @@
         },
         "parameters": {
           "f5Name": { "value": "[parameters('f5Name')]" },
-          "numberOFBIGIPs": { "value": "[parameters('numberOFBIGIPs')]" }
+          "numberOFBIGIPs": { "value": "[parameters('numberOFBIGIPs')]" },
+          "f5version": { "value": "[parameters('f5Version')]"}
         }
       }
     },
