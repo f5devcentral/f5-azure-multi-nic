@@ -271,7 +271,7 @@
               "sourceAddressPrefix": "*",
               "sourcePortRange": "*",
               "destinationAddressPrefix": "*",
-              "destinationPortRange": "[variables('f5versionport')[parameters('f5version')]]",
+              "destinationPortRange": "443",
               "protocol": "Tcp",
               "direction": "Inbound",
               "access": "Allow"
