@@ -40,7 +40,7 @@
         },
         "protocol": "tcp",
         "frontendPort": "[copyIndex(8443)]",
-        "backendPort": "[variables('f5version')[parameters('f5version')]]",
+        "backendPort": "443",
         "enableFloatingIP": false
       }
     },
