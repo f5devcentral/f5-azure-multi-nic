@@ -394,8 +394,7 @@
           "f5Name": { "value": "[parameters('f5Name')]" },
           "numberOFBIGIPs": { "value": "[parameters('numberOFBIGIPs')]" },
           "licenseKeys": { "value": "[parameters('licenseKeys')]" },
-          "adminPassword": { "value": "[parameters('adminPassword')]" },
-          "f5version": { "value": "[parameters('f5version')]" }
+          "adminPassword": { "value": "[parameters('adminPassword')]" }
         }
       }
     }
