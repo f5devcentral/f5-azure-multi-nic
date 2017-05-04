@@ -63,5 +63,5 @@ mydg=$(ip route get 1 | awk '{print $3;exit}')
 
 
 /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ${externalip} --port ${port} -u admin --password-url file:///config/cloud/passwd --hostname ${hostname}.${location}.cloudapp.azure.com --license ${licenseKey} --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal
-/usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --log-level debug --output /var/log/network.log --host ${externalip} --port ${port} -u admin --password-url file:///config/cloud/passwd --multi-nic --default-gw ${mydg} --vlan name:external, nic:1.0 --vlan name:internal, nic:1.1 --self-ip name:external_ip, address:${externalip}, vlan:external --self-ip name:internal_ip, address:${udrip}, vlan:internal --force-reboot
+/usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --log-level debug --output /var/log/network.log --host ${externalip} --port ${port} -u admin --password-url file:///config/cloud/passwd --multi-nic --default-gw ${mydg} --vlan name:external,nic:1.0 --vlan name:internal,nic:1.1 --self-ip name:external_ip,address:${externalip},vlan:external --self-ip name:internal_ip,address:${udrip},vlan:internal --force-reboot
 rm -f /config/cloud/passwd
