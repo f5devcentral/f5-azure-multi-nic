@@ -193,10 +193,6 @@
       "BYOL": "1",
       "Hourly": "2"
     },
-    "f5versionport": {
-      "12.1.2": "443",
-      "13.0.0": "8443"
-    },
     "f5Offer": {
       "BYOL": "f5-big-ip",
       "Hourly": "f5-big-ip-hourly"

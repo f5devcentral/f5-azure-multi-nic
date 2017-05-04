@@ -14,17 +14,10 @@
     },
     "adminPassword": {
       "type": "securestring"
-    },
-    "f5version": {
-      "type": "string"
     }
   },
   "variables": {
     "f5CloudLibsTag": "v2.3.0",
-    "f5version": {
-      "12.1.2": "443",
-      "13.0.0": "8443"
-    },
     "licenseKeys": "dummy",
     "externalNICNamePrefix": "[concat(parameters('f5Name'),'-externalnic')]",
     "udrNICNamePrefix": "[concat(parameters('f5Name'),'-udrnic')]",
