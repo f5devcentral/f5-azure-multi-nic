@@ -55,7 +55,11 @@ while getopts ":e:h:l:k:o:u:" opt; do
 done
 
 ## Get the Default Gateway IP address of this device.
-mydg=$(ip route get 1 | awk '{print $3;exit}')
+#mydg=$(ip route get 1 | awk '{print $3;exit}')
+
+mydg=$(echo ${externalip%?})
+mydg="${mydg}1"
+
 
 ## Execute the CloudLibs
 #--network "--wait-for ONBOARD_DONE --log-level debug --output /var/log/network.log --host ${myip} -u admin -p ${adminpass} --multi-nic --default-gw ${mydg} --vlan external,1.0 --vlan internal,1.1 --self-ip external_ip,${myip},external --log-level debug --background --force-reboot --signal NETWORK_DONE" 
