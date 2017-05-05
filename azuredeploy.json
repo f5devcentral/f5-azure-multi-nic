@@ -14,10 +14,16 @@
         "description": "The Name of the existing virtual network that you want to connect the BIG-IP's to."
       }
     },
+    "mgmtSubnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of mgmt subnet - with External Acccess to Internet."
+      }
+    },
     "externalSubnetName": {
       "type": "string",
       "metadata": {
-        "description": "Name of first subnet - with External Acccess to Internet."
+        "description": "Name of external subnet - with External Acccess to Internet."
       }
     },
     "internalSubnetName": {
@@ -123,7 +129,7 @@
       "type": "string",
       "defaultValue": "0",
       "metadata": {
-        "description": "By default two interfaces are deployed.  If the VM instance that you have chosen supports more than two, you can specify the additional number of NIC's here.  So if you can have 4, you would specify 2 here.  Zero, means only 2 NIC's will be deployed."
+        "description": "By default three interfaces are deployed, (MGMT, External, Internal).  If the VM instance that you have chosen supports more than three, you can specify the additional number of NIC's here.  So if you want to have 4, you would specify 1 here.  Zero, means only 3 NIC's will be deployed."
       },
       "allowedValues": [
         "0",
@@ -131,8 +137,7 @@
         "2",
         "3",
         "4",
-        "5",
-        "6"
+        "5"
       ]
     },
     "numberOfPublicIPAddresses": {
@@ -203,13 +208,12 @@
     },
     "templateLocationPrefix": "https://raw.githubusercontent.com/f5devcentral/f5-azure-multi-nic/onboard/",
     "bigipHash": {
-      "0": "[concat(variables('templateLocationPrefix'),'two_nic_bigip_vm.json')]",
-      "1": "[concat(variables('templateLocationPrefix'),'three_nic_bigip_vm.json')]",
-      "2": "[concat(variables('templateLocationPrefix'),'four_nic_bigip_vm.json')]",
-      "3": "[concat(variables('templateLocationPrefix'),'five_nic_bigip_vm.json')]",
-      "4": "[concat(variables('templateLocationPrefix'),'six_nic_bigip_vm.json')]",
-      "5": "[concat(variables('templateLocationPrefix'),'seven_nic_bigip_vm.json')]",
-      "6": "[concat(variables('templateLocationPrefix'),'eight_nic_bigip_vm.json')]"
+      "0": "[concat(variables('templateLocationPrefix'),'three_nic_bigip_vm.json')]",
+      "1": "[concat(variables('templateLocationPrefix'),'four_nic_bigip_vm.json')]",
+      "2": "[concat(variables('templateLocationPrefix'),'five_nic_bigip_vm.json')]",
+      "3": "[concat(variables('templateLocationPrefix'),'six_nic_bigip_vm.json')]",
+      "4": "[concat(variables('templateLocationPrefix'),'seven_nic_bigip_vm.json')]",
+      "5": "[concat(variables('templateLocationPrefix'),'eight_nic_bigip_vm.json')]"
     },
     "publiciphash" : {
       "1": "[concat(variables('templateLocationPrefix'),'one_pip.json')]",
@@ -252,10 +256,51 @@
     {
       "apiVersion": "2015-06-15",
       "tags": {
-        "displayName": "Network Security Group"
+        "displayName": "External Network Security Group"
       },
       "type": "Microsoft.Network/networkSecurityGroups",
-      "name": "[concat(parameters('f5Name'), '-nsg')]",
+      "name": "[concat(parameters('f5Name'), '-externalnsg')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "app_rule_880",
+            "properties": {
+              "description": "",
+              "priority": 101,
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "880",
+              "protocol": "Tcp",
+              "direction": "Inbound",
+              "access": "Allow"
+            }
+          },
+          {
+            "name": "app_rule_8443",
+            "properties": {
+              "description": "",
+              "priority": 102,
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "8443",
+              "protocol": "Tcp",
+              "direction": "Inbound",
+              "access": "Allow"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "tags": {
+        "displayName": "MGMT Network Security Group"
+      },
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[concat(parameters('f5Name'), '-mgmtnsg')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "securityRules": [
@@ -286,20 +331,6 @@
               "direction": "Inbound",
               "access": "Allow"
             }
-          },
-          {
-            "name": "app_rule_880",
-            "properties": {
-              "description": "",
-              "priority": 103,
-              "sourceAddressPrefix": "*",
-              "sourcePortRange": "*",
-              "destinationAddressPrefix": "*",
-              "destinationPortRange": "880",
-              "protocol": "Tcp",
-              "direction": "Inbound",
-              "access": "Allow"
-            }
           }
         ]
       }
@@ -320,28 +351,6 @@
         },
         "parameters": {
           "f5Name": { "value": "[parameters('f5Name')]" }
-        }
-      }
-    },
-    {
-      "apiVersion": "2015-01-01",
-      "name": "InboundNATRuleTemplate",
-      "type": "Microsoft.Resources/deployments",
-      "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', 'ALBPIPTemplate')]",
-        "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]",
-        "[concat('Microsoft.Compute/availabilitySets/', variables('avsetNamePrefix'))]"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "[concat(variables('templateLocationPrefix'), 'inboundNATRules.json')]",
-          "contentVersion": "1.0.0.0"
-        },
-        "parameters": {
-          "f5Name": { "value": "[parameters('f5Name')]" },
-          "numberOFBIGIPs": { "value": "[parameters('numberOFBIGIPs')]" },
-          "f5version": { "value": "[parameters('f5Version')]"}
         }
       }
     },
@@ -371,6 +380,7 @@
           "f5version": { "value": "[variables('f5version')[parameters('f5Version')]]" },
           "vnetResourceGroupName": { "value": "[toLower(parameters('vnetResourceGroupName'))]" },
           "vnetName": { "value": "[parameters('vnetName')]" },
+          "mgmtSubnetName": { "value": "[parameters('mgmtSubnetName')]" },
           "externalSubnetName": { "value": "[parameters('externalSubnetName')]" },
           "internalSubnetName": { "value": "[parameters('internalSubnetName')]" },
           "additionalSubnets": { "value": "[parameters('additionalSubnets')]"}
