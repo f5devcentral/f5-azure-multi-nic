@@ -12,9 +12,10 @@
   },
   "variables": {
     "f5publicIPName": "[concat(parameters('f5Name'),'-IP')]",
-    "loadBalancerName": "[concat(parameters('f5Name'),'-ALB')]"
+    "loadBalancerName": "[concat(parameters('f5Name'),'-ALB')]",
+    "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('f5publicIPName'))]"    
   },
-  "resources": [
+  "resources": [    
     {
       "apiVersion": "2015-05-01-preview",
       "tags": {
@@ -72,7 +73,7 @@
         ],
         "loadBalancingRules": [
           {
-            "name": "lbrule0",
+            "name": "lbrule880",
             "properties": {
               "frontendIPConfiguration": {
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd0')]"
@@ -81,7 +82,7 @@
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
               },
               "probe": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe0')]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe880')]"
               },
               "protocol": "Tcp",
               "frontendPort": 80,
@@ -90,7 +91,7 @@
             }
           },
           {
-            "name": "lbrule1",
+            "name": "lbrule881",
             "properties": {
               "frontendIPConfiguration": {
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd1')]"
@@ -99,7 +100,7 @@
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
               },
               "probe": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe1')]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe881')]"
               },
               "protocol": "Tcp",
               "frontendPort": 80,
@@ -110,7 +111,7 @@
         ],
         "probes": [
           {
-            "name": "lbprobe0",
+            "name": "lbprobe880",
             "properties": {
               "protocol": "Tcp",
               "port": 880,
@@ -119,7 +120,7 @@
             }            
           },
           {
-            "name": "lbprobe1",
+            "name": "lbprobe881",
             "properties": {
               "protocol": "Tcp",
               "port": 881,

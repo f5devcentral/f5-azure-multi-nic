@@ -12,7 +12,8 @@
   },
   "variables": {
     "f5publicIPName": "[concat(parameters('f5Name'),'-IP')]",
-    "loadBalancerName": "[concat(parameters('f5Name'),'-ALB')]"
+    "loadBalancerName": "[concat(parameters('f5Name'),'-ALB')]",
+    "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('f5publicIPName'))]"    
   },
   "resources": [
     {
@@ -99,7 +100,7 @@
         ],
         "loadBalancingRules": [
           {
-            "name": "lbrule0",
+            "name": "lbrule880",
             "properties": {
               "frontendIPConfiguration": {
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd0')]"
@@ -108,7 +109,7 @@
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
               },
               "probe": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe0')]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe880')]"
               },
               "protocol": "Tcp",
               "frontendPort": 80,
@@ -117,7 +118,7 @@
             }
           },
           {
-            "name": "lbrule1",
+            "name": "lbrule881",
             "properties": {
               "frontendIPConfiguration": {
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd1')]"
@@ -126,7 +127,7 @@
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
               },
               "probe": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe1')]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe881')]"
               },
               "protocol": "Tcp",
               "frontendPort": 80,
@@ -135,7 +136,7 @@
             }
           },
           {
-            "name": "lbrule2",
+            "name": "lbrule882",
             "properties": {
               "frontendIPConfiguration": {
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd2')]"
@@ -144,7 +145,7 @@
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
               },
               "probe": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe2')]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe882')]"
               },
               "protocol": "Tcp",
               "frontendPort": 80,
@@ -153,7 +154,7 @@
             }
           },
           {
-            "name": "lbrule3",
+            "name": "lbrule883",
             "properties": {
               "frontendIPConfiguration": {
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd3')]"
@@ -162,7 +163,7 @@
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
               },
               "probe": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe3')]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe883')]"
               },
               "protocol": "Tcp",
               "frontendPort": 80,
@@ -171,7 +172,7 @@
             }
           },
           {
-            "name": "lbrule4",
+            "name": "lbrule884",
             "properties": {
               "frontendIPConfiguration": {
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd4')]"
@@ -180,7 +181,7 @@
                 "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
               },
               "probe": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe4')]"
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe884')]"
               },
               "protocol": "Tcp",
               "frontendPort": 80,
@@ -191,7 +192,7 @@
         ],
         "probes": [
           {
-            "name": "lbprobe0",
+            "name": "lbprobe880",
             "properties": {
               "protocol": "Tcp",
               "port": 880,
@@ -200,7 +201,7 @@
             }            
           },
           {
-            "name": "lbprobe1",
+            "name": "lbprobe881",
             "properties": {
               "protocol": "Tcp",
               "port": 881,
@@ -209,7 +210,7 @@
             }            
           },
           {
-            "name": "lbprobe2",
+            "name": "lbprobe882",
             "properties": {
               "protocol": "Tcp",
               "port": 882,
@@ -218,7 +219,7 @@
             }            
           },
           {
-            "name": "lbprobe3",
+            "name": "lbprobe883",
             "properties": {
               "protocol": "Tcp",
               "port": 883,
@@ -227,7 +228,7 @@
             }            
           },
           {
-            "name": "lbprobe4",
+            "name": "lbprobe884",
             "properties": {
               "protocol": "Tcp",
               "port": 884,
