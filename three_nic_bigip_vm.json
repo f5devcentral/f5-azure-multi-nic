@@ -195,7 +195,7 @@
       "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/',variables('externalNICNamePrefix'), copyIndex())]",
         "[concat('Microsoft.Network/networkInterfaces/',variables('udrNICNamePrefix'), copyIndex())]",
-        "[concat('Microsoft.Network/networkInterfaces/',variables('additionNICNamePrefix'),0, copyIndex())]"
+        "[concat('Microsoft.Network/networkInterfaces/',variables('mgmtNICNamePrefix'), copyIndex())]"
       ],
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[concat(parameters('f5Name'),copyIndex())]",
