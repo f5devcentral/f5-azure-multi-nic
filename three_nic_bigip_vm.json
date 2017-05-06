@@ -46,7 +46,6 @@
     }
   },
   "variables": {
-    "intAddBigIPs": "[int(parameters('numberOFBIGIPs'))]",
     "avsetNamePrefix": "[concat(parameters('f5Name'),'-avset')]",    
     "mgmtNICNamePrefix": "[concat(parameters('f5Name'),'-mgmtnic')]",
     "externalNICNamePrefix": "[concat(parameters('f5Name'),'-externalnic')]",
