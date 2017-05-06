@@ -82,7 +82,7 @@
         "displayName": "MGMT NIC"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/',variables('mgmtNICNamePrefix'), copyIndex())]"
+        "[concat('Microsoft.Network/publicIPAddresses/',parameters('f5Name'),'mgmt')]"
       ],
       "copy": {
         "count": "[parameters('numberOFBIGIPs')]",
