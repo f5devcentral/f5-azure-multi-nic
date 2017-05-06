@@ -66,13 +66,17 @@
       "tags": {
         "displayName": "MGMT Public IP Address"
       },
+      "copy": {
+        "count": "[parameters('numberOFBIGIPs')]",
+        "name": "mgmtpipcopy"
+      },
       "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[concat(parameters('f5Name'),'mgmt')]",
+      "name": "[concat(parameters('f5Name'),'mgmt',copyIndex())]",
       "location": "[resourceGroup().location]",
       "properties": {
         "publicIPAllocationMethod": "Dynamic",
         "dnsSettings": {
-          "domainNameLabel": "[concat(parameters('f5Name'),'mgmt')]"
+          "domainNameLabel": "[concat(parameters('f5Name'),'mgmt',copyIndex())]"
         }
       }
     },
