@@ -81,6 +81,9 @@
       "tags": {
         "displayName": "MGMT NIC"
       },
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/',variables('mgmtNICNamePrefix'), copyIndex())]"
+      ],
       "copy": {
         "count": "[parameters('numberOFBIGIPs')]",
         "name": "niccopy"
