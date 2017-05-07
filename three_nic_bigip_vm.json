@@ -105,7 +105,7 @@
             "properties": {
               "privateIPAllocationMethod": "Dynamic",
               "publicIPAddress": {
-                "id": "[variables('mgmtPIPID')]"
+                "id": "[concat(variables('mgmtPIPID'),copyIndex())]"
               },
               "subnet": {
                 "id": "[concat(variables('subnet-idMGMT'), copyIndex())]"
