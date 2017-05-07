@@ -108,7 +108,7 @@
                 "id": "[concat(variables('mgmtPIPID'),copyIndex())]"
               },
               "subnet": {
-                "id": "[concat(variables('subnet-idMGMT'), copyIndex())]"
+                "id": "[variables('subnet-idMGMT')]"
               }
             }
           }
