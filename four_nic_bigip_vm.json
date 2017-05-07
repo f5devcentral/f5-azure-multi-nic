@@ -149,15 +149,7 @@
                 {
                   "id": "[concat(variables('lbID'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
                 }
-              ],
-              "loadBalancerInboundNatRules": [
-                {
-                  "id": "[concat(variables('lbID'), '/inboundNatRules/', 'guimgt',copyIndex())]"
-                },
-                {
-                  "id": "[concat(variables('lbID'), '/inboundNatRules/', 'sshmgt',copyIndex())]"
-                }
-              ]
+              ]          
             }
           }
         ]
