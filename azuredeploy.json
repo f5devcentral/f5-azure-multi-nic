@@ -125,6 +125,17 @@
         4
       ]
     },
+    "cluster": {
+      "type": "string",
+      "defaultValue": "No",
+      "metadata": {
+        "description": "If you want to deploy more than one BIG-IP and would like them to be clusterd together, choose yes."
+      },
+      "allowedValues": [
+        "Yes",
+        "No"
+      ]
+    },
     "numberOfAdditionalInterfaces": {
       "type": "string",
       "defaultValue": "0",
@@ -403,7 +414,8 @@
           "f5Name": { "value": "[parameters('f5Name')]" },
           "numberOFBIGIPs": { "value": "[parameters('numberOFBIGIPs')]" },
           "licenseKeys": { "value": "[parameters('licenseKeys')]" },
-          "adminPassword": { "value": "[parameters('adminPassword')]" }
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "cluster": { "value": "[parameters('cluster')]" }
         }
       }
     }

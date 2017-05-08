@@ -13,6 +13,7 @@ Deploy a Multi-NIC BIG-IP into Azure
 
 ### Release Notes:
 Added Features:
+* The ability to choose to cluster the BIG-IP's or not.
 * The ability to choose up to 5 Public IP Addresses.
 * Removed 2 NIC BIG-IP option.
   * The default configuration is now a 3 NIC BIG-IP where the first NIC is the Management NIC.  For the purposes of this template and ease of deployment, the Management NIC is configued with its own Public IP Address.  This of course can be removed to make the BIG-IP more secure.
