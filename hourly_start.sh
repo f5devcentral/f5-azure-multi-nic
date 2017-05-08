@@ -72,7 +72,7 @@ lastchar=$(echo ${hostname: -1})
 ## Execute the CloudLibs
 
 /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --hostname ${hostname}.${location}.cloudapp.azure.com --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal
-/usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --output /var/log/network.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --default-gw ${mydg} --vlan external,1.1 --vlan internal,1.2 --self-ip external_ip,${externalip},external --self-ip internal_ip,${udrip},internal --force-reboot
+/usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --output /var/log/network.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --default-gw ${mydg} --vlan external,1.1 --vlan internal,1.2 --self-ip external_ip,${externalip},external --self-ip internal_ip,${udrip},internal
 
 if [ ${cluster} == "yes" ]; then
     if [ ${lastchar} == "0" ]; then
@@ -82,3 +82,4 @@ if [ ${cluster} == "yes" ]; then
         /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --config-sync-ip ${internalip} --joing-group --remote-host ${mastermgmtip} --remote-user admin --remote-password-url file:///config/cloud/passwd --remote-port ${port} --device-group Sync --sync
 fi
 rm -f /config/cloud/passwd
+reboot
