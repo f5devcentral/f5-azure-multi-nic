@@ -33,7 +33,6 @@
 ## port
 ## udr IP address
 
-# Parse the command line arguments, primarily checking full params as short params are just placeholders
 while getopts ":c:e:h:l:k:m:o:u:" opt; do
   case $opt in
     c)
@@ -63,6 +62,12 @@ while getopts ":c:e:h:l:k:m:o:u:" opt; do
   esac
 done
 
+function clustering {
+  lastchar=$(echo ${1: -1})
+  if [ ${lastchar} == 0 ]; then
+
+}
+
 ## Get the Default Gateway IP address of this device.
 
 mydg=$(echo ${externalip%?})
@@ -72,7 +77,7 @@ mydg="${mydg}1"
 ## Execute the CloudLibs
 
 /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --hostname ${hostname}.${location}.cloudapp.azure.com --license ${licenseKey} --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal
-/usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --output /var/log/network.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --default-gw ${mydg} --vlan name:external,nic:1.1 --vlan name:internal,nic:1.2 --self-ip name:external_ip,address:${externalip},vlan:external --self-ip name:internal_ip,address:${udrip},vlan:internal --force-reboot
+/usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --output /var/log/network.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --default-gw ${mydg} --vlan external,1.1 --vlan internal,1.2 --self-ip external_ip,${externalip},external --self-ip internal_ip,${udrip},internal --force-reboot
 
 if [ ${cluster} == "yes" ]; then
   /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --config-sync-ip ${internalip} --create-group --device-group Sync --sync-type sync-failover --device ${hostname}.${location}.cloudapp.azure.com --auto-sync --save-on-auto-sync
