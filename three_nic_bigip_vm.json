@@ -114,11 +114,14 @@
               }
             }
           }
-        ]
+        ],
+        "dnsSettings": {
+          "internalDnsNameLabel": "[concat(parameters('f5Name'),copyIndex())]"
+        }
       }
     },
     {
-      "apiVersion": "2015-05-01-preview",
+      "apiVersion": "2016-09-01",
       "tags": {
         "displayName": "External NIC"
       },
@@ -141,7 +144,7 @@
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
                 "id": "[variables('subnet-idExternal')]"
-              },
+              },              
               "loadBalancerBackendAddressPools": [
                 {
                   "id": "[concat(variables('lbID'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
@@ -149,7 +152,7 @@
               ]           
             }
           }
-        ]
+        ]        
       }
     },
     {
