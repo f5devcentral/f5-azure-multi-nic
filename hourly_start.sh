@@ -76,7 +76,7 @@ lastchar=$(echo ${hostname: -1})
 
 if [ ${cluster} == "Yes" ]; then
     if [ ${lastchar} == "0" ]; then
-        /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --wait-for NETWORK_DONE --output /var/log/cluster.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --config-sync-ip ${udrip} --create-group --device-group Sync --sync-type sync-failover --device ${hostname}.${location}.cloudapp.azure.com --auto-sync --save-on-auto-sync &
+        /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --wait-for NETWORK_DONE --output /var/log/cluster.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --config-sync-ip ${udrip} --create-group --network-failover --device-group Sync --sync-type sync-failover --device ${hostname}.${location}.cloudapp.azure.com --auto-sync --save-on-auto-sync &
     else
         mastermgmtip=$(nslookup ${hostname} | awk '/^Address: / { print $2 }')
         /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --wait-for NETWORK_DONE --output /var/log/cluster.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --config-sync-ip ${udrip} --joing-group --remote-host ${mastermgmtip} --remote-user admin --remote-password-url file:///config/cloud/passwd --remote-port ${port} --device-group Sync --sync &
