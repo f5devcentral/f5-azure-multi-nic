@@ -71,16 +71,17 @@ lastchar=$(echo ${hostname: -1})
 
 ## Execute the CloudLibs
 
-/usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --hostname ${hostname}.${location}.cloudapp.azure.com --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal
-/usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --output /var/log/network.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --default-gw ${mydg} --vlan external,1.1 --vlan internal,1.2 --self-ip external_ip,${externalip},external --self-ip internal_ip,${udrip},internal
+/usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --hostname ${hostname}.${location}.cloudapp.azure.com --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --signal ONBOARD_DONE &
+/usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/network.js --wait-for ONBOARD_DONE --output /var/log/network.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --default-gw ${mydg} --vlan external,1.1 --vlan internal,1.2 --self-ip external_ip,${externalip},external --self-ip internal_ip,${udrip},internal --no-reboot --signal NETWORK_DONE &
 
 if [ ${cluster} == "yes" ]; then
     if [ ${lastchar} == "0" ]; then
-        /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --config-sync-ip ${internalip} --create-group --device-group Sync --sync-type sync-failover --device ${hostname}.${location}.cloudapp.azure.com --auto-sync --save-on-auto-sync
+        /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --wait-for NETWORK_DONE --output /var/log/cluster.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --config-sync-ip ${internalip} --create-group --device-group Sync --sync-type sync-failover --device ${hostname}.${location}.cloudapp.azure.com --auto-sync --save-on-auto-sync &
     else
         mastermgmtip=$(nslookup ${hostname} | awk '/^Address: / { print $2 }')
-        /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --config-sync-ip ${internalip} --joing-group --remote-host ${mastermgmtip} --remote-user admin --remote-password-url file:///config/cloud/passwd --remote-port ${port} --device-group Sync --sync
+        /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --wait-for NETWORK_DONE --output /var/log/cluster.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --config-sync-ip ${internalip} --joing-group --remote-host ${mastermgmtip} --remote-user admin --remote-password-url file:///config/cloud/passwd --remote-port ${port} --device-group Sync --sync &
     fi
 fi
+wait
 rm -f /config/cloud/passwd
 reboot
