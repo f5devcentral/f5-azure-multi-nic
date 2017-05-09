@@ -28,6 +28,7 @@
     },
     "internalSubnetName": {
       "type": "string",
+      "defaultValue": "",
       "metadata": {
         "description": "Name of internal Subnet for UDR, NOT the subnet with the Servers in it."
       }
