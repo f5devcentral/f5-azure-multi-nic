@@ -80,6 +80,7 @@ if [ ${cluster} == "yes" ]; then
     else
         mastermgmtip=$(nslookup ${hostname} | awk '/^Address: / { print $2 }')
         /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --output /var/log/cluster.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --config-sync-ip ${internalip} --joing-group --remote-host ${mastermgmtip} --remote-user admin --remote-password-url file:///config/cloud/passwd --remote-port ${port} --device-group Sync --sync
+    fi
 fi
 rm -f /config/cloud/passwd
 reboot
