@@ -82,7 +82,7 @@ if [ ${cluster} == "Yes" ]; then
         /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --wait-for NETWORK_DONE --output /var/log/cluster.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --config-sync-ip ${udrip} --create-group --device-group Sync --sync-type sync-only --device ${hostname}.${location}.cloudapp.azure.com --auto-sync --save-on-auto-sync &
     else
         mastermgmtip=$(ping -c 1 ${master} | awk -F'[ :]' 'NR==2 { print $4 }')
-        /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --wait-for NETWORK_DONE --output /var/log/cluster.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --config-sync-ip ${udrip} --joing-group --remote-host ${mastermgmtip} --remote-user admin --remote-password-url file:///config/cloud/passwd --remote-port ${port} --device-group Sync --sync &
+        /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --wait-for NETWORK_DONE --output /var/log/cluster.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --config-sync-ip ${udrip} --join-group --remote-host ${mastermgmtip} --remote-user admin --remote-password-url file:///config/cloud/passwd --remote-port ${port} --device-group Sync --sync &
     fi
 fi
 wait
