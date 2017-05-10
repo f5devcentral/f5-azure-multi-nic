@@ -69,7 +69,7 @@ mydg="${mydg}1"
 
 lastchar=$(echo ${hostname: -1})
 
-mastert=$(echo ${hostname%?})
+master=$(echo ${hostname%?})
 master="${master}1"
 
 ## Execute the CloudLibs
