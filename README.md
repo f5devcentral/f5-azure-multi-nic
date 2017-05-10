@@ -69,7 +69,8 @@ This template will allow you to deploy more than one F5 BIG-IP into Azure with 3
   * If you want to deploy more than one BIG-IP and would like them to be clusterd together, choose yes.
 * numberOfAdditionalInterfaces
   * Required
-  * By default two interfaces are deployed with this template.  If the VM instance that you have chosen supports more than two NIC objects, you can specify the additional number of NIC's here.  For example if you can have 4, you would specify 2 here.  Zero, means only 2 NIC's will be deployed.
+  * By default three interfaces are deployed with this template.  If the VM instance that you have chosen supports more than three NIC objects, you can specify the additional number of NIC's here.  For example if you can have 4, you would specify 1 here.  Zero, means only 3 NIC's will be deployed.
+  * Note that any additional interfaces deployed beyond the default 3 will not be configured by this template.  You will need to login to the BIG-IP and configure the additional interfaces and their IP addresses.
 * numberOfPublicIPAddresses
   * Required
   * By default one Public IP address is deployed.  Select up to 5 additional Public IP addresses to be deployed with these BIG-IP's.
