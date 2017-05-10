@@ -69,6 +69,9 @@ mydg="${mydg}1"
 
 lastchar=$(echo ${hostname: -1})
 
+mastert=$(echo ${hostname%?})
+master="${master}1"
+
 ## Execute the CloudLibs
 
 /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/onboard.js --output /var/log/onboard.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --hostname ${hostname}.${location}.cloudapp.azure.com --license ${licenseKey} --ntp pool.ntp.org --db tmm.maxremoteloglength:2048 --module ltm:nominal --signal ONBOARD_DONE &
@@ -78,7 +81,7 @@ if [ ${cluster} == "Yes" ]; then
     if [ ${lastchar} == "0" ]; then
         /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --wait-for NETWORK_DONE --output /var/log/cluster.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --config-sync-ip ${internalip} --create-group --network-failover --device-group Sync --sync-type sync-failover --device ${hostname}.${location}.cloudapp.azure.com --auto-sync --save-on-auto-sync &
     else
-        mastermgmtip=$(nslookup ${hostname} | awk '/^Address: / { print $2 }')
+        mastermgmtip=$(ping -c 1 ${master} | awk -F'[ :]' 'NR==2 { print $4 }')
         /usr/bin/f5-rest-node /config/cloud/f5-cloud-libs/scripts/cluster.js --wait-for NETWORK_DONE --output /var/log/cluster.log --log-level debug --host ${mgmtip} --port ${port} -u admin --password-url file:///config/cloud/passwd --config-sync-ip ${internalip} --joing-group --remote-host ${mastermgmtip} --remote-user admin --remote-password-url file:///config/cloud/passwd --remote-port ${port} --device-group Sync --sync &
     fi
 fi
