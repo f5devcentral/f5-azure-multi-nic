@@ -14,14 +14,21 @@
         "description": "The Name of the existing virtual network that you want to connect the BIG-IP's to."
       }
     },
+    "mgmtSubnetName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of mgmt subnet - with External Acccess to Internet."
+      }
+    },
     "externalSubnetName": {
       "type": "string",
       "metadata": {
-        "description": "Name of first subnet - with External Acccess to Internet."
+        "description": "Name of external subnet - with External Acccess to Internet."
       }
     },
     "internalSubnetName": {
       "type": "string",
+      "defaultValue": "",
       "metadata": {
         "description": "Name of internal Subnet for UDR, NOT the subnet with the Servers in it."
       }
@@ -33,7 +40,18 @@
         "description": "The Unique Name of the BIG-IP instance, that will be used for the Public DNS Name of the Public IP."
       }
     },
-    "f5SKU": {
+    "f5LicenseType": {
+      "type": "string",
+      "defaultValue": "Hourly",
+      "allowedValues": [
+        "BYOL",
+        "Hourly"
+      ],
+      "metadata": {
+        "description": "Choose the license type for the F5 BIG-IP you wish to deploy.  BYOL, or Hourly"
+      }
+    },
+    "f5FeatureSet": {
       "type": "string",
       "defaultValue": "Best",
       "allowedValues": [
@@ -42,19 +60,54 @@
         "Best"
       ],
       "metadata": {
-        "description": "Choose the SKU of F5 BIG-IP you wish to deploy.  Good, Better, Best"
+        "description": "Choose the feature set for the F5 BIG-IP you wish to deploy.  Good, Better, Best"
+      }
+    },
+    "f5ThroughPutLevel": {
+      "type": "string",
+      "defaultValue": "200m",
+      "allowedValues": [
+        "25m",
+        "200m",
+        "1g"
+      ],
+      "metadata": {
+        "description": "Choose the throughput level for the F5 BIG-IP you wish to deploy.  25Mbps, 200Mbps, 1Gbps"
+      }
+    },
+    "f5Version": {
+      "type": "string",
+      "defaultValue": "13.0.0",
+      "allowedValues": [
+        "12.1.2",
+        "13.0.0"
+      ],
+      "metadata": {
+        "description": "Choose the version of the F5 BIG-IP you wish to deploy.  12.1.2, 13.0.0"
       }
     },
     "f5Size": {
       "type": "string",
-      "defaultValue": "Standard_F2s",
+      "defaultValue": "Standard_A2_v2",
       "allowedValues": [
-        "Standard_DS2_v2",
-        "Standard_DS3_v2",
-        "Standard_DS4_v2",
-        "Standard_F2s",
-        "Standard_F4s",
-        "Standard_F8s"
+        "Standard_A2_v2",
+        "Standard_A4_v2",
+        "Standard_A8_v2",
+        "Standard_D2",
+        "Standard_D3",
+        "Standard_D4",
+        "Standard_D11",
+        "Standard_D12",
+        "Standard_D13",
+        "Standard_D14",
+        "Standard_A8_v2",
+        "Standard_D3_v2",
+        "Standard_D4_v2",
+        "Standard_D5_v2",
+        "Standard_D11_v2",
+        "Standard_D12_v2",
+        "Standard_13_v2",
+        "Standard_D14_v2"
       ],
       "metadata": {
         "description": "The size of the BIG-IP Instance."
@@ -73,11 +126,22 @@
         4
       ]
     },
+    "cluster": {
+      "type": "string",
+      "defaultValue": "No",
+      "metadata": {
+        "description": "If you want to deploy more than one BIG-IP and would like them to be clusterd together, choose yes."
+      },
+      "allowedValues": [
+        "Yes",
+        "No"
+      ]
+    },
     "numberOfAdditionalInterfaces": {
       "type": "string",
       "defaultValue": "0",
       "metadata": {
-        "description": "By default two interfaces are deployed.  If the VM instance that you have chosen supports more than two, you can specify the additional number of NIC's here.  So if you can have 4, you would specify 2 here.  Zero, means only 2 NIC's will be deployed."
+        "description": "By default three interfaces are deployed, (MGMT, External, Internal).  If the VM instance that you have chosen supports more than three, you can specify the additional number of NIC's here.  So if you want to have 4, you would specify 1 here.  Zero, means only 3 NIC's will be deployed."
       },
       "allowedValues": [
         "0",
@@ -85,9 +149,29 @@
         "2",
         "3",
         "4",
-        "5",
-        "6"
+        "5"
       ]
+    },
+    "numberOfPublicIPAddresses": {
+      "type": "string",
+      "defaultValue": "1",
+      "metadata": {
+        "description": "By default one Public IP address is deployed.  Select up to 5 additional Public IP addresses to be deployed with these BIG-IP's."
+      },
+      "allowedValues": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5"
+      ]
+    },
+    "licenseKeys" : {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "A semi-colon delimited string of BYOL License Keys, one for each of the BIG-IP you intend to deploy. (No Spaces) Leave Blank for Hourly"
+      }
     },
     "additionalSubnets":{
       "type": "string",
@@ -111,26 +195,48 @@
   },
   "variables": {
     "avsetNamePrefix": "[concat(parameters('f5Name'),'-avset')]",
-    "vnetID": "[resourceId(parameters('vnetResourceGroupName'),'Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
-    "subnet-idInternal": "[concat(variables('vnetID'),'/subnets/',parameters('internalSubnetName'))]",
-    "f5publicIPName": "[concat(parameters('f5Name'),'-IP')]",
     "newStorageAccountName": "[concat(parameters('f5Name'),'store')]",
-    "loadBalancerName": "[concat(parameters('f5Name'),'-ALB')]", 
-    "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('f5publicIPName'))]",
-    "skuHash": {
-      "Good": "f5-bigip-virtual-edition-good-byol",
-      "Better": "f5-bigip-virtual-edition-better-byol",
-      "Best": "f5-bigip-virtual-edition-best-byol"
+    "skuBase": "f5-bigip-virtual-edition-",
+    "f5FeatureSetHash": {
+      "Good": "good",
+      "Better": "better",
+      "Best": "best"
+    },
+    "f5sku": {
+      "BYOL": "[concat(variables('skuBase'),variables('f5FeatureSetHash')[parameters('f5FeatureSet')],'-byol')]",
+      "Hourly": "[concat(variables('skuBase'),parameters('f5ThroughPutLevel'),'-',variables('f5FeatureSetHash')[parameters('f5FeatureSet')],'-hourly')]"
+    },
+    "f5version12": {
+      "BYOL": "1",
+      "Hourly": "2"
+    },
+    "f5Offer": {
+      "BYOL": "f5-big-ip",
+      "Hourly": "f5-big-ip-hourly"
+    },
+    "f5version": {
+      "12.1.2": "[concat('12.1.2',variables('f5version12')[parameters('f5LicenseType')])]",
+      "13.0.0": "13.0.020"
     },
     "templateLocationPrefix": "https://raw.githubusercontent.com/f5devcentral/f5-azure-multi-nic/master/",
     "bigipHash": {
-      "0": "[concat(variables('templateLocationPrefix'),'two_nic_bigip_vm.json')]",
-      "1": "[concat(variables('templateLocationPrefix'),'three_nic_bigip_vm.json')]",
-      "2": "[concat(variables('templateLocationPrefix'),'four_nic_bigip_vm.json')]",
-      "3": "[concat(variables('templateLocationPrefix'),'five_nic_bigip_vm.json')]",
-      "4": "[concat(variables('templateLocationPrefix'),'six_nic_bigip_vm.json')]",
-      "5": "[concat(variables('templateLocationPrefix'),'seven_nic_bigip_vm.json')]",
-      "6": "[concat(variables('templateLocationPrefix'),'eight_nic_bigip_vm.json')]"
+      "0": "[concat(variables('templateLocationPrefix'),'three_nic_bigip_vm.json')]",
+      "1": "[concat(variables('templateLocationPrefix'),'four_nic_bigip_vm.json')]",
+      "2": "[concat(variables('templateLocationPrefix'),'five_nic_bigip_vm.json')]",
+      "3": "[concat(variables('templateLocationPrefix'),'six_nic_bigip_vm.json')]",
+      "4": "[concat(variables('templateLocationPrefix'),'seven_nic_bigip_vm.json')]",
+      "5": "[concat(variables('templateLocationPrefix'),'eight_nic_bigip_vm.json')]"
+    },
+    "publiciphash" : {
+      "1": "[concat(variables('templateLocationPrefix'),'one_pip.json')]",
+      "2": "[concat(variables('templateLocationPrefix'),'two_pip.json')]",
+      "3": "[concat(variables('templateLocationPrefix'),'three_pip.json')]",
+      "4": "[concat(variables('templateLocationPrefix'),'four_pip.json')]",
+      "5": "[concat(variables('templateLocationPrefix'),'five_pip.json')]"
+    },
+    "onboardMap" : {
+      "BYOL": "[concat(variables('templateLocationPrefix'),'byol_onboarding.json')]",
+      "Hourly": "[concat(variables('templateLocationPrefix'),'hourly_onboarding.json')]"
     }
   },
   "resources": [
@@ -156,31 +262,57 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
       "properties": {
-        "accountType": "Premium_LRS"
-      }
-    },
-    {
-      "apiVersion": "2015-05-01-preview",
-      "tags": {
-        "displayName": "Public IP Address"
-      },
-      "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[variables('f5publicIPName')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "publicIPAllocationMethod": "Dynamic",
-        "dnsSettings": {
-          "domainNameLabel": "[parameters('f5Name')]"
-        }
+        "accountType": "Standard_LRS"
       }
     },
     {
       "apiVersion": "2015-06-15",
       "tags": {
-        "displayName": "Network Security Group"
+        "displayName": "External Network Security Group"
       },
       "type": "Microsoft.Network/networkSecurityGroups",
-      "name": "[concat(parameters('f5Name'), '-nsg')]",
+      "name": "[concat(parameters('f5Name'), '-externalnsg')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "app_rule_880",
+            "properties": {
+              "description": "",
+              "priority": 101,
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "880",
+              "protocol": "Tcp",
+              "direction": "Inbound",
+              "access": "Allow"
+            }
+          },
+          {
+            "name": "app_rule_8443",
+            "properties": {
+              "description": "",
+              "priority": 102,
+              "sourceAddressPrefix": "*",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*",
+              "destinationPortRange": "8443",
+              "protocol": "Tcp",
+              "direction": "Inbound",
+              "access": "Allow"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "tags": {
+        "displayName": "MGMT Network Security Group"
+      },
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[concat(parameters('f5Name'), '-mgmtnsg')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "securityRules": [
@@ -211,102 +343,26 @@
               "direction": "Inbound",
               "access": "Allow"
             }
-          },
-          {
-            "name": "app_rule_880",
-            "properties": {
-              "description": "",
-              "priority": 103,
-              "sourceAddressPrefix": "*",
-              "sourcePortRange": "*",
-              "destinationAddressPrefix": "*",
-              "destinationPortRange": "880",
-              "protocol": "Tcp",
-              "direction": "Inbound",
-              "access": "Allow"
-            }
           }
         ]
       }
-    },    
-    {
-      "apiVersion": "2015-06-15",
-      "tags": {
-        "displayName": "Azure Load Balancer"
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('f5publicIPName'))]"
-      ],
-      "location": "[resourceGroup().location]",
-      "name": "[variables('loadBalancerName')]",
-      "properties": {
-        "frontendIPConfigurations": [
-          {
-            "name": "loadBalancerFrontEnd",
-            "properties": {
-              "publicIPAddress": {
-                "id": "[variables('publicIPID')]"
-              }
-            }
-          }
-        ],
-        "backendAddressPools": [
-          {
-            "name": "loadBalancerBackEnd"
-          }
-        ],
-        "loadBalancingRules": [
-          {
-            "name": "lbrule",
-            "properties": {
-              "frontendIPConfiguration": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd')]"
-              },
-              "backendAddressPool": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
-              },
-              "probe": {
-                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe')]"
-              },
-              "protocol": "Tcp",
-              "frontendPort": 80,
-              "backendPort": 880,
-              "idleTimeoutInMinutes": 15
-            }
-          }
-        ],
-        "probes": [
-          {
-            "properties": {
-              "protocol": "Tcp",
-              "port": 880,
-              "intervalInSeconds": 15,
-              "numberOfProbes": 2
-            },
-            "name": "lbprobe"
-          }
-        ]
-      },
-      "type": "Microsoft.Network/loadBalancers"
     },
     {
       "apiVersion": "2015-01-01",
-      "name": "InboundNATRuleTemplate",
+      "name": "ALBPIPTemplate",
       "type": "Microsoft.Resources/deployments",
       "dependsOn": [
-        "[concat('Microsoft.Network/loadBalancers/',variables('loadBalancerName'))]",
         "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]",
         "[concat('Microsoft.Compute/availabilitySets/', variables('avsetNamePrefix'))]"
       ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
-          "uri": "[concat(variables('templateLocationPrefix'), 'inboundNATRules.json')]",
+          "uri": "[variables('publiciphash')[parameters('numberOfPublicIPAddresses')]]",
           "contentVersion": "1.0.0.0"
         },
         "parameters": {
-          "f5Name": { "value": "[parameters('f5Name')]" },
-          "numberOFBIGIPs": { "value": "[parameters('numberOFBIGIPs')]" }
+          "f5Name": { "value": "[parameters('f5Name')]" }
         }
       }
     },
@@ -315,9 +371,9 @@
       "name": "BIGIPTemplate",
       "type": "Microsoft.Resources/deployments",
       "dependsOn": [
-        "[concat('Microsoft.Resources/deployments/', 'InboundNATRuleTemplate')]",
         "[concat('Microsoft.Storage/storageAccounts/', variables('newStorageAccountName'))]",
-        "[concat('Microsoft.Compute/availabilitySets/', variables('avsetNamePrefix'))]"
+        "[concat('Microsoft.Compute/availabilitySets/', variables('avsetNamePrefix'))]",
+        "[concat('Microsoft.Resources/deployments/', 'ALBPIPTemplate')]"
       ],
       "properties": {
         "mode": "Incremental",
@@ -331,24 +387,39 @@
           "numberOFBIGIPs": { "value": "[parameters('numberOFBIGIPs')]" },
           "adminUsername": { "value": "[parameters('adminUsername')]" },
           "adminPassword": { "value": "[parameters('adminPassword')]" },
-          "f5SKU": { "value": "[variables('skuHash')[parameters('f5SKU')]]" },
+          "f5Offer": {"value": "[variables('f5Offer')[parameters('f5LicenseType')]]"},
+          "f5SKU": { "value": "[variables('f5sku')[parameters('f5LicenseType')]]" },
+          "f5version": { "value": "[variables('f5version')[parameters('f5Version')]]" },
           "vnetResourceGroupName": { "value": "[toLower(parameters('vnetResourceGroupName'))]" },
           "vnetName": { "value": "[parameters('vnetName')]" },
+          "mgmtSubnetName": { "value": "[parameters('mgmtSubnetName')]" },
           "externalSubnetName": { "value": "[parameters('externalSubnetName')]" },
           "internalSubnetName": { "value": "[parameters('internalSubnetName')]" },
           "additionalSubnets": { "value": "[parameters('additionalSubnets')]"}
         }
       }
-    }
-  ],
-  "outputs": {
-    "GUI-URL": {
-      "type": "string",
-      "value": "[concat('https://',reference(variables('publicIPID')).dnsSettings.fqdn,':8443')]"
     },
-    "SSH-URL": {
-      "type": "string",
-      "value": "[concat(reference(variables('publicIPID')).dnsSettings.fqdn, ' 8022')]"
+    {
+      "apiVersion": "2015-01-01",
+      "name": "OnBoardingTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "dependsOn": [
+        "[concat('Microsoft.Resources/deployments/', 'BIGIPTemplate')]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "[variables('onboardMap')[parameters('f5LicenseType')]]",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "f5Name": { "value": "[parameters('f5Name')]" },
+          "numberOFBIGIPs": { "value": "[parameters('numberOFBIGIPs')]" },
+          "licenseKeys": { "value": "[parameters('licenseKeys')]" },
+          "adminPassword": { "value": "[parameters('adminPassword')]" },
+          "cluster": { "value": "[parameters('cluster')]" }
+        }
+      }
     }
-  }
+  ]
 }

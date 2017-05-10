@@ -17,13 +17,22 @@
     "adminPassword": {
       "type": "securestring"
     },
+    "f5Offer": {
+      "type": "string"
+    },
     "f5SKU": {
+      "type": "string"
+    },
+    "f5version": {
       "type": "string"
     },
     "vnetResourceGroupName": {
       "type": "string"
     },
     "vnetName": {
+      "type": "string"
+    },
+    "mgmtSubnetName": {
       "type": "string"
     },
     "externalSubnetName": {
@@ -37,23 +46,82 @@
     }
   },
   "variables": {
-    "intAddBigIPs": "[int(parameters('numberOFBIGIPs'))]",
-    "avsetNamePrefix": "[concat(parameters('f5Name'),'-avset')]",
+    "avsetNamePrefix": "[concat(parameters('f5Name'),'-avset')]",    
+    "mgmtNICNamePrefix": "[concat(parameters('f5Name'),'-mgmtnic')]",
     "externalNICNamePrefix": "[concat(parameters('f5Name'),'-externalnic')]",
     "udrNICNamePrefix": "[concat(parameters('f5Name'),'-udrnic')]",
-    "additionNICNamePrefix": "[concat(parameters('f5Name'),'-nic')]",
     "newStorageAccountName": "[concat(parameters('f5Name'),'store')]",
     "vnetID": "[resourceId(parameters('vnetResourceGroupName'),'Microsoft.Network/virtualNetworks',parameters('vnetName'))]",
+    "subnet-idMGMT": "[concat(variables('vnetID'),'/subnets/',parameters('mgmtSubnetName'))]",
     "subnet-idExternal": "[concat(variables('vnetID'),'/subnets/',parameters('externalSubnetName'))]",
     "subnet-idInternal": "[concat(variables('vnetID'),'/subnets/',parameters('internalSubnetName'))]",
-    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(parameters('f5Name'),'-nsg'))]",
+    "mgmtnsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(parameters('f5Name'),'-mgmtnsg'))]",
+    "nsgID": "[resourceId('Microsoft.Network/networkSecurityGroups/',concat(parameters('f5Name'),'-externalnsg'))]",
+    "mgmtPIPID": "[resourceId('Microsoft.Network/publicIPAddresses',concat(parameters('f5Name'),'mgmt'))]",
     "loadBalancerName": "[concat(parameters('f5Name'),'-ALB')]",
-    "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]",
-    "additionalSubnets": "[split(parameters('additionalSubnets'), ';')]"
+    "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('loadBalancerName'))]"
   },
   "resources": [
     {
       "apiVersion": "2015-05-01-preview",
+      "tags": {
+        "displayName": "MGMT Public IP Address"
+      },
+      "copy": {
+        "count": "[parameters('numberOFBIGIPs')]",
+        "name": "mgmtpipcopy"
+      },
+      "type": "Microsoft.Network/publicIPAddresses",
+      "name": "[concat(parameters('f5Name'),'mgmt',copyIndex())]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(parameters('f5Name'),'mgmt',copyIndex())]"
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "tags": {
+        "displayName": "MGMT NIC"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/',parameters('f5Name'),'mgmt',copyIndex())]"
+      ],
+      "copy": {
+        "count": "[parameters('numberOFBIGIPs')]",
+        "name": "niccopy"
+      },
+      "type": "Microsoft.Network/networkInterfaces",
+      "name": "[concat(variables('mgmtNICNamePrefix'), copyIndex())]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "networkSecurityGroup": {
+          "id": "[variables('mgmtnsgID')]"
+        },
+        "enableIPForwarding": true,
+        "ipConfigurations": [
+          {
+            "name": "ipconfig",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIPAddress": {
+                "id": "[concat(variables('mgmtPIPID'),copyIndex())]"
+              },
+              "subnet": {
+                "id": "[variables('subnet-idMGMT')]"
+              }
+            }
+          }
+        ],
+        "dnsSettings": {
+          "internalDnsNameLabel": "[concat(parameters('f5Name'),copyIndex())]"
+        }
+      }
+    },
+    {
+      "apiVersion": "2016-09-01",
       "tags": {
         "displayName": "External NIC"
       },
@@ -76,23 +144,15 @@
               "privateIPAllocationMethod": "Dynamic",
               "subnet": {
                 "id": "[variables('subnet-idExternal')]"
-              },
+              },              
               "loadBalancerBackendAddressPools": [
                 {
                   "id": "[concat(variables('lbID'), '/backendAddressPools/', 'loadBalancerBackEnd')]"
                 }
-              ],
-              "loadBalancerInboundNatRules": [
-                {
-                  "id": "[concat(variables('lbID'), '/inboundNatRules/', 'guimgt',copyIndex())]"
-                },
-                {
-                  "id": "[concat(variables('lbID'), '/inboundNatRules/', 'sshmgt',copyIndex())]"
-                }
-              ]
+              ]           
             }
           }
-        ]
+        ]        
       }
     },
     {
@@ -123,32 +183,6 @@
       }
     },
     {
-      "apiVersion": "2015-05-01-preview",
-      "tags": {
-        "displayName": "Additional NIC 0"
-      },
-      "copy": {
-        "count": "[variables('intAddBigIPs')]",
-        "name": "niccopy"
-      },
-      "type": "Microsoft.Network/networkInterfaces",
-      "name": "[concat(variables('additionNICNamePrefix'),0,copyIndex())]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig",
-            "properties": {
-              "privateIPAllocationMethod": "Dynamic",
-              "subnet": {
-                "id": "[concat(variables('vnetID'),'/subnets/',variables('additionalSubnets')[0])]"
-              }
-            }
-          }
-        ]
-      }
-    },
-    {
       "apiVersion": "2015-06-15",
       "tags": {
         "displayName": "BIG-IP VM"
@@ -160,7 +194,7 @@
       "dependsOn": [
         "[concat('Microsoft.Network/networkInterfaces/',variables('externalNICNamePrefix'), copyIndex())]",
         "[concat('Microsoft.Network/networkInterfaces/',variables('udrNICNamePrefix'), copyIndex())]",
-        "[concat('Microsoft.Network/networkInterfaces/',variables('additionNICNamePrefix'),0, copyIndex())]"
+        "[concat('Microsoft.Network/networkInterfaces/',variables('mgmtNICNamePrefix'), copyIndex())]"
       ],
       "type": "Microsoft.Compute/virtualMachines",
       "name": "[concat(parameters('f5Name'),copyIndex())]",
@@ -168,7 +202,7 @@
       "plan": {
         "name": "[parameters('f5SKU')]",
         "publisher": "f5-networks",
-        "product": "f5-big-ip"
+        "product": "[parameters('f5Offer')]"
 
       },
       "properties": {
@@ -186,9 +220,9 @@
         "storageProfile": {
           "imageReference": {
             "publisher": "f5-networks",
-            "offer": "f5-big-ip",
+            "offer": "[parameters('f5Offer')]",
             "sku": "[parameters('f5SKU')]",
-            "version": "latest"
+            "version": "[parameters('f5version')]"
           },
           "osDisk": {
             "name": "[concat(parameters('f5Name'), 'osDisk',copyIndex())]",
@@ -204,7 +238,7 @@
             {
               "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('externalNICNamePrefix'),copyIndex()))]",
               "properties": {
-                "primary": true
+                "primary": false
               }
             },
             {
@@ -214,9 +248,9 @@
               }
             },
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('additionNICNamePrefix'),0,copyIndex()))]",
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat(variables('mgmtNICNamePrefix'),copyIndex()))]",
               "properties": {
-                "primary": false
+                "primary": true
               }
             }
           ]

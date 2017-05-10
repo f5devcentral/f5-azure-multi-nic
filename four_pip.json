@@ -1,0 +1,207 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "f5Name": {
+      "type": "string",
+      "defaultValue": "bigip",
+      "metadata": {
+        "description": "The Unique Name of the BIG-IP instance, that will be used for the Public DNS Name of the Public IP."
+      }
+    }
+  },
+  "variables": {
+    "f5publicIPName": "[concat(parameters('f5Name'),'-IP')]",
+    "loadBalancerName": "[concat(parameters('f5Name'),'-ALB')]",
+    "publicIPID": "[resourceId('Microsoft.Network/publicIPAddresses',variables('f5publicIPName'))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-05-01-preview",
+      "tags": {
+        "displayName": "Public IP Address"
+      },
+      "type": "Microsoft.Network/publicIPAddresses",
+      "copy": {
+        "count": 4,
+        "name": "pipcopy"
+      },
+      "name": "[concat(variables('f5publicIPName'),copyIndex())]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "publicIPAllocationMethod": "Dynamic",
+        "dnsSettings": {
+          "domainNameLabel": "[concat(parameters('f5Name'),'ip',copyIndex())]"
+        }
+      }
+    },
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Network/loadBalancers",
+      "tags": {
+        "displayName": "Azure Load Balancer"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('f5publicIPName'),0)]",
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('f5publicIPName'),1)]",
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('f5publicIPName'),2)]",
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('f5publicIPName'),3)]"
+      ],
+      "location": "[resourceGroup().location]",
+      "name": "[variables('loadBalancerName')]",
+      "properties": {
+        "frontendIPConfigurations": [
+          {
+            "name": "loadBalancerFrontEnd0",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('f5publicIPName'),0))]"
+              }
+            }
+          },
+          {
+            "name": "loadBalancerFrontEnd1",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('f5publicIPName'),1))]"
+              }
+            }
+          },
+          {
+            "name": "loadBalancerFrontEnd2",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('f5publicIPName'),2))]"
+              }
+            }
+          },
+          {
+            "name": "loadBalancerFrontEnd3",
+            "properties": {
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses',concat(variables('f5publicIPName'),3))]"
+              }
+            }
+          }
+        ],
+        "backendAddressPools": [
+          {
+            "name": "loadBalancerBackEnd"
+          }
+        ],
+        "loadBalancingRules": [
+          {
+            "name": "lbrule880",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd0')]"
+              },
+              "backendAddressPool": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
+              },
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe880')]"
+              },
+              "protocol": "Tcp",
+              "frontendPort": 80,
+              "backendPort": 880,
+              "idleTimeoutInMinutes": 15
+            }
+          },
+          {
+            "name": "lbrule881",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd1')]"
+              },
+              "backendAddressPool": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
+              },
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe881')]"
+              },
+              "protocol": "Tcp",
+              "frontendPort": 80,
+              "backendPort": 881,
+              "idleTimeoutInMinutes": 15
+            }
+          },
+          {
+            "name": "lbrule882",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd2')]"
+              },
+              "backendAddressPool": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
+              },
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe882')]"
+              },
+              "protocol": "Tcp",
+              "frontendPort": 80,
+              "backendPort": 882,
+              "idleTimeoutInMinutes": 15
+            }
+          },
+          {
+            "name": "lbrule883",
+            "properties": {
+              "frontendIPConfiguration": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/frontendIpConfigurations/loadBalancerFrontEnd3')]"
+              },
+              "backendAddressPool": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/backendAddressPools/loadBalancerBackEnd')]"
+              },
+              "probe": {
+                "id": "[concat(resourceId('Microsoft.Network/loadBalancers', variables('loadBalancerName')), '/probes/lbprobe883')]"
+              },
+              "protocol": "Tcp",
+              "frontendPort": 80,
+              "backendPort": 883,
+              "idleTimeoutInMinutes": 15
+            }
+          }
+        ],
+        "probes": [
+          {
+            "name": "lbprobe880",
+            "properties": {
+              "protocol": "Tcp",
+              "port": 880,
+              "intervalInSeconds": 15,
+              "numberOfProbes": 2
+            }            
+          },
+          {
+            "name": "lbprobe881",
+            "properties": {
+              "protocol": "Tcp",
+              "port": 881,
+              "intervalInSeconds": 15,
+              "numberOfProbes": 2
+            }            
+          },
+          {
+            "name": "lbprobe882",
+            "properties": {
+              "protocol": "Tcp",
+              "port": 882,
+              "intervalInSeconds": 15,
+              "numberOfProbes": 2
+            }            
+          },
+          {
+            "name": "lbprobe883",
+            "properties": {
+              "protocol": "Tcp",
+              "port": 883,
+              "intervalInSeconds": 15,
+              "numberOfProbes": 2
+            }            
+          }
+        ]
+      }      
+    }
+  ]
+}
