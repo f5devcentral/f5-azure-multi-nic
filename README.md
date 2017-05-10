@@ -1,12 +1,12 @@
 [![Releases](https://img.shields.io/github/release/f5devcentral/f5-azure-multi-nic.svg)](https://github.com/f5devcentral/f5-azure-multi-nic/releases)
 [![Commits](https://img.shields.io/github/commits-since/f5devcentral/f5-azure-multi-nic/v1.0.1.svg)](https://github.com/f5devcentral/f5-azure-multi-nic/commits)
 [![Issues](https://img.shields.io/github/issues/f5devcentral/f5-azure-multi-nic.svg)](https://github.com/f5devcentral/f5-azure-multi-nic/issues)
-[![TMOS Version](https://img.shields.io/badge/tmos--version-13.0-ff0000.svg)](https://github.com/f5devcentral/f5-azure-multi-nic)
+[![TMOS Version](https://img.shields.io/badge/tmos--version-13.0.2-ff0000.svg)](https://github.com/f5devcentral/f5-azure-multi-nic)
 
 # Azure Multi-NIC BIG-IP
 Deploy a Multi-NIC BIG-IP into Azure  
 
-<a target="_blank" href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ff5devcentral%2Ff5-azure-multi-nic%2Fmulti-pip%2Fazuredeploy.json">
+<a target="_blank" href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Ff5devcentral%2Ff5-azure-multi-nic%2Fmaster%2Fazuredeploy.json">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
