@@ -53,10 +53,10 @@ This template will allow you to deploy more than one F5 BIG-IP into Azure with 3
   * Required
   * Choose the SKU of F5 BIG-IP you wish to deploy.  Good, Better, Best
 * F5ThroughPutLevel
-  * required
+  * Required
   * Choose the throughput level for the F5 BIG-IP you wish to deploy.  25Mbps, 200Mbps, 1Gbps
 * f5Version
-  * required
+  * Required
   * Choose the version of the F5 BIG-IP you wish to deploy.  12.1.2, 13.0.0
 * f5Size
   * Required
@@ -64,6 +64,9 @@ This template will allow you to deploy more than one F5 BIG-IP into Azure with 3
 * numberOFBIGIPs
   * Required
   * The total number of BIG-IP's (Up to 4) you want to deploy.
+* cluster
+  * required
+  * If you want to deploy more than one BIG-IP and would like them to be clusterd together, choose yes.
 * numberOfAdditionalInterfaces
   * Required
   * By default two interfaces are deployed with this template.  If the VM instance that you have chosen supports more than two NIC objects, you can specify the additional number of NIC's here.  For example if you can have 4, you would specify 2 here.  Zero, means only 2 NIC's will be deployed.
