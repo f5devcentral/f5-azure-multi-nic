@@ -115,4 +115,9 @@ This is where you specify the name of the resource group that contains the Virtu
 
 ## How to connect to your Multi-NIC BIG-IP's to manage them:
 
-After the deployment successfuly finishes, you can find the BIG-IP Management UI\SSH URLs by doing the following;  Find the resource group that was deployed, which is the same name as the "f5name".  When you click on this object you will see the deployment status.  Click on the deployment status, and then the deployment.  In the "Outputs" section you will find the URL's and ports that you can use to connect to the F5 BIG-IP. 
+After the deployment successfuly finishes, you can find the BIG-IP Management UI\SSH URL by doing the following;
+* Find the resource group that you deployed this template into
+* Click on the resource name object and you will see the deployment status
+* Click on the deployment status
+* Click on the deployment
+* In the "Outputs" section you will find the URL that you can use to connect to the F5 BIG-IP.
