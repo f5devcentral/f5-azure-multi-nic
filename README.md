@@ -11,7 +11,7 @@ Deploy a Multi-NIC BIG-IP into Azure
 </a>
 
 
-### Release Notes:
+## Release Notes:
 Added Features:
 * The ability to choose to cluster the BIG-IP's or not.
 * The ability to choose up to 5 Public IP Addresses.
