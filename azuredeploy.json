@@ -218,7 +218,7 @@
       "12.1.2": "[concat('12.1.2',variables('f5version12')[parameters('f5LicenseType')])]",
       "13.0.0": "13.0.020"
     },
-    "templateLocationPrefix": "https://raw.githubusercontent.com/f5devcentral/f5-azure-multi-nic/master/",
+    "templateLocationPrefix": "https://raw.githubusercontent.com/f5devcentral/f5-azure-multi-nic/outputs/",
     "bigipHash": {
       "0": "[concat(variables('templateLocationPrefix'),'three_nic_bigip_vm.json')]",
       "1": "[concat(variables('templateLocationPrefix'),'four_nic_bigip_vm.json')]",
