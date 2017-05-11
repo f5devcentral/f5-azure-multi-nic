@@ -26,7 +26,7 @@ Added Features:
 
 This template will allow you to deploy more than one F5 BIG-IP into Azure with 3 or more network interfaces.  Remember that the total number of interfaces that can be deployed is predicated on the number of NIC objects supported by the underlying Virtual Instance Size.  If you choose to deploy on an instance size that only supports 2 NIC's for example but you request that 4 NIC's be created from this template, then template deployment will fail.  Please see this [link](https://azure.microsoft.com/en-us/documentation/articles/virtual-machines-windows-sizes/#size-tables) to determine the Virtual Instances Sizes and the number of NIC's that are supported.
 
-### Parameter Definitions: ###
+## Parameter Definitions: ###
 
 * vnetResourceGroupName
   * Required
@@ -89,7 +89,7 @@ This template will allow you to deploy more than one F5 BIG-IP into Azure with 3
 
 
 
-### What get's deployed:
+## What get's deployed:
 
 This template will deploy the following inside of either a new resource group or an existing one depending on what you select;
 
@@ -98,7 +98,7 @@ This template will deploy the following inside of either a new resource group or
 * NIC objects for the F5 BIG-IP VM.
 * F5 BIG-IP Virtual Machine
 
-### During Deployment
+## During Deployment
 During Deployment there are "TWO" references to a resource group.  One is:
  
 <img src="https://raw.githubusercontent.com/tstanley93/Azure-Multi-NIC/master/Azure-Multi-NIC/Azure-Multi-NIC/rg_01.jpg" />
@@ -113,6 +113,6 @@ This is where you specify the name of the resource group that contains the Virtu
 
 
 
-### How to connect to your Multi-NIC BIG-IP's to manage them:
+## How to connect to your Multi-NIC BIG-IP's to manage them:
 
 After the deployment successfuly finishes, you can find the BIG-IP Management UI\SSH URLs by doing the following;  Find the resource group that was deployed, which is the same name as the "f5name".  When you click on this object you will see the deployment status.  Click on the deployment status, and then the deployment.  In the "Outputs" section you will find the URL's and ports that you can use to connect to the F5 BIG-IP. 
