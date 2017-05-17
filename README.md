@@ -89,7 +89,7 @@ This template will allow you to deploy more than one F5 BIG-IP into Azure with 3
 
 
 
-## What get's deployed:
+## What gets deployed:
 
 This template will deploy the following inside of either a new resource group or an existing one depending on what you select;
 
