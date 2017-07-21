@@ -12,6 +12,12 @@ Deploy a Multi-NIC BIG-IP into Azure
 
 
 ## Release Notes:
+
+07/20/2017
+Updated the version of CloudLibs.  Also fixed a bug where the box would reboot.
+
+Note: The deployment looks like it times out and fails in Azure.  This is a bug with Azure and we are working with them, however deployment is successful. 
+
 Added Features:
 * The ability to choose to cluster the BIG-IP's or not.
 * The ability to choose up to 5 Public IP Addresses.
