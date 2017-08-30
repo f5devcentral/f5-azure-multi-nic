@@ -13,6 +13,10 @@ Deploy a Multi-NIC BIG-IP into Azure
 
 ## Release Notes:
 
+08/30/2017
+Fixed below note when it looks like it fails for 12.1.2
+Fixed bug with version of BIG-IP for 12.1.2
+
 07/20/2017
 Updated the version of CloudLibs.  Also fixed a bug where the box would reboot.
 
